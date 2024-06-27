@@ -1,0 +1,5 @@
+# microservice specific routes
+
+GET        /financial-institutions/list/:subscriptionId                                  uk.gov.hmrc.crsfatcafimanagement.controllers.FIManagementController.listFinancialInstitutions(subscriptionId: String)
+
+GET        /financial-institutions/view/:subscriptionId/:financialInstitutionId          uk.gov.hmrc.crsfatcafimanagement.controllers.FIManagementController.viewFinancialInstitution(subscriptionId: String, financialInstitutionId: String)
