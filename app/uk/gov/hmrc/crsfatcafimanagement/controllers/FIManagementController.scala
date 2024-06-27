@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,21 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.controllers
 
+import com.google.inject.Inject
+import play.api.Logging
+import play.api.mvc.ControllerComponents
+import uk.gov.hmrc.crsfatcafimanagement.auth.AuthActionSets
+import uk.gov.hmrc.crsfatcafimanagement.config.AppConfig
+import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
 
-@Singleton()
-class MicroserviceHelloWorldController @Inject() (cc: ControllerComponents) extends BackendController(cc) {
+import scala.concurrent.ExecutionContext
 
-  def hello(): Action[AnyContent] = Action.async {
-    Future.successful(Ok("Hello world"))
-  }
-
-}
+class FIManagementController @Inject() (
+  val config: AppConfig,
+  authenticator: AuthActionSets,
+  connector: CADXConnector,
+  override val controllerComponents: ControllerComponents
+)(implicit executionContext: ExecutionContext)
+    extends BackendController(controllerComponents)
+    with Logging {}
