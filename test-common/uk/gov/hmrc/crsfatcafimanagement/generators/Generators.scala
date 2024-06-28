@@ -20,11 +20,16 @@ import org.scalacheck.Arbitrary._
 import org.scalacheck.{Gen, Shrink}
 import wolfendale.scalacheck.regexp.RegexpGen
 
-trait Generators {
+trait Generators extends ModelGenerators {
 
   implicit val dontShrink: Shrink[String] = Shrink.shrinkAny
 
-  val subscriptionIDRegex              = "^[X][A-Z][0-9]{13}"
+  val subscriptionIDRegex = "^[X][A-Z][0-9]{13}"
+  val phoneNumberRegex    = "[A-Z0-9)/(\\-*#+]*"
+
   def validSubscriptionID: Gen[String] = RegexpGen.from(subscriptionIDRegex)
+  def validPhoneNumber: Gen[String]    = RegexpGen.from(phoneNumberRegex)
+
+  def stringOfLength(n: Int): Gen[String] = Gen.listOfN(n, Gen.alphaChar).map(_.mkString)
 
 }

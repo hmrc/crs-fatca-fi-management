@@ -20,10 +20,13 @@ import org.mockito.MockitoSugar
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
+import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, OptionValues, TryValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Configuration
 import play.api.inject.guice.GuiceApplicationBuilder
+import uk.gov.hmrc.http.HeaderCarrier
 
 trait SpecBase
     extends AnyFreeSpec
@@ -34,7 +37,11 @@ trait SpecBase
     with ScalaFutures
     with MockitoSugar
     with BeforeAndAfterEach
-    with BeforeAndAfterAll {
+    with BeforeAndAfterAll
+    with TableDrivenPropertyChecks
+    with ScalaCheckPropertyChecks {
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
