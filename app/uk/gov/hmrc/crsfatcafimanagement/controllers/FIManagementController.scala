@@ -18,7 +18,8 @@ package uk.gov.hmrc.crsfatcafimanagement.controllers
 
 import com.google.inject.Inject
 import play.api.Logging
-import play.api.mvc.ControllerComponents
+import play.api.mvc.{Action, AnyContent, ControllerComponents, Request}
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.crsfatcafimanagement.auth.AuthActionSets
 import uk.gov.hmrc.crsfatcafimanagement.config.AppConfig
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
@@ -30,7 +31,15 @@ class FIManagementController @Inject() (
   val config: AppConfig,
   authenticator: AuthActionSets,
   connector: CADXConnector,
+  authConnector: AuthConnector,
   override val controllerComponents: ControllerComponents
 )(implicit executionContext: ExecutionContext)
     extends BackendController(controllerComponents)
-    with Logging {}
+    with Logging {
+
+  def helloWorld: Action[AnyContent] =
+    Action {
+      implicit request: Request[AnyContent] => Ok("Hello World")
+    }
+
+}

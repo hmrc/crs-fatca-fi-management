@@ -1,2 +1,3 @@
 # microservice specific routes
 
+POST        /ASMService/v1/FIManagement           uk.gov.hmrc.crsfatcafimanagement.controllers.FIManagementController.helloWorld
