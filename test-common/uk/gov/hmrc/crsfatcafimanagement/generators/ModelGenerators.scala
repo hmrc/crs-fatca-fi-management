@@ -19,6 +19,7 @@ package uk.gov.hmrc.crsfatcafimanagement.generators
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.listOf
 import org.scalacheck.{Arbitrary, Gen}
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateFIDetails, CreateFIDetailsRequest, RequestCommon, RequestDetails, RequestParameter}
 import uk.gov.hmrc.crsfatcafimanagement.models._
 
 trait ModelGenerators {
@@ -123,5 +124,65 @@ trait ModelGenerators {
     Arbitrary {
       arbitrary[ViewFIDetails].map(ViewFIDetailsResponse.apply)
     }
+
+  implicit val arbitraryViewFIDetailsRequest: Arbitrary[CreateFIDetailsRequest] =
+    Arbitrary {
+      arbitrary[CreateFIDetails].map(CreateFIDetailsRequest.apply)
+    }
+
+  implicit val arbitraryCreateFIDetails: Arbitrary[CreateFIDetails] = Arbitrary {
+    for {
+      requestCommon  <- arbitrary[RequestCommon]
+      requestDetails <- arbitrary[RequestDetails]
+    } yield CreateFIDetails(requestCommon, requestDetails)
+  }
+
+  implicit val arbitraryRequestCommon: Arbitrary[RequestCommon] = Arbitrary {
+    for {
+      originatingSystem  <- stringOfLength(30)
+      transmittingSystem <- stringOfLength(30)
+      requestType = RequestType.CREATE
+      regime      = "CRSFATCA"
+      requestParameters <- listOf(arbitrary[RequestParameter])
+    } yield RequestCommon(
+      originatingSystem,
+      transmittingSystem,
+      requestType,
+      regime,
+      requestParameters
+    )
+  }
+
+  implicit val arbitraryRequestParameter: Arbitrary[RequestParameter] =
+    Arbitrary {
+      for {
+        parameterName  <- stringOfLength(100)
+        parameterValue <- stringOfLength(255)
+      } yield RequestParameter(parameterName, parameterValue)
+    }
+
+  implicit val arbitraryRequestDetails: Arbitrary[RequestDetails] = Arbitrary {
+    for {
+      fiId                    <- stringOfLength(15)
+      fiName                  <- stringOfLength(105)
+      subscriptionId          <- validSubscriptionID
+      tinDetails              <- arbitrary[TINDetails]
+      isFIUser                <- arbitrary[Boolean]
+      isFATCAReporting        <- arbitrary[Boolean]
+      addressDetails          <- arbitrary[AddressDetails]
+      primaryContactDetails   <- arbitrary[ContactDetails]
+      secondaryContactDetails <- arbitrary[ContactDetails]
+    } yield RequestDetails(
+      FIID = fiId,
+      FIName = fiName,
+      SubscriptionID = subscriptionId,
+      TINDetails = List(tinDetails),
+      IsFIUser = isFIUser,
+      IsFATCAReporting = isFATCAReporting,
+      AddressDetails = addressDetails,
+      PrimaryContactDetails = primaryContactDetails,
+      SecondaryContactDetails = secondaryContactDetails
+    )
+  }
 
 }
