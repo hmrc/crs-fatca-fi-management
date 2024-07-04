@@ -18,28 +18,41 @@ package uk.gov.hmrc.crsfatcafimanagement.controllers
 
 import com.google.inject.Inject
 import play.api.Logging
-import play.api.mvc.{Action, AnyContent, ControllerComponents, Request}
-import uk.gov.hmrc.auth.core.AuthConnector
+import play.api.libs.json.JsValue
+import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.crsfatcafimanagement.auth.AuthActionSets
 import uk.gov.hmrc.crsfatcafimanagement.config.AppConfig
-import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.CreateFIDetailsRequest
+import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
+import uk.gov.hmrc.crsfatcafimanagement.services.CADXSubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class FIManagementController @Inject() (
   val config: AppConfig,
   authenticator: AuthActionSets,
-  connector: CADXConnector,
-  authConnector: AuthConnector,
+  service: CADXSubmissionService,
   override val controllerComponents: ControllerComponents
 )(implicit executionContext: ExecutionContext)
     extends BackendController(controllerComponents)
     with Logging {
 
-  def helloWorld: Action[AnyContent] =
-    Action {
-      implicit request: Request[AnyContent] => Ok("Hello World")
-    }
-
+  def createSubmission(): Action[JsValue] = authenticator.authenticateAll.async(parse.json) { implicit request =>
+    //Change below to ViewFIDetailsRequest when implemented
+    request.body.validate[CreateFIDetailsRequest].fold(
+      invalid =>
+        Future.successful {
+          logger.warn(s" createSubmission Json Validation Failed: $invalid")
+          InternalServerError("Json Validation Failed")
+        },
+      validReq =>
+        service.createFI(validReq).map {
+          case Right(_) => Ok
+          case Left(CreateSubmissionError(value)) =>
+            logger.warn(s"CreateSubmissionError $value")
+            InternalServerError(s"CreateSubmissionError $value")
+        }
+    )
+  }
 }
