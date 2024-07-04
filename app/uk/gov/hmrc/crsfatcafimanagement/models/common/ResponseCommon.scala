@@ -16,17 +16,19 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models.common
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.JsonConfiguration.Aux
+import play.api.libs.json.{Json, JsonConfiguration, JsonNaming, OFormat}
 import uk.gov.hmrc.crsfatcafimanagement.models.RequestType
 
 final case class ResponseCommon(
-  OriginatingSystem: String,
-  TransmittingSystem: String,
-  RequestType: RequestType,
-  Regime: String,
-  ResponseParameters: List[ResponseParameter]
+  originatingSystem: String,
+  transmittingSystem: String,
+  requestType: RequestType,
+  regime: String,
+  responseParameters: List[ResponseParameter]
 )
 
 object ResponseCommon {
-  implicit val format: OFormat[ResponseCommon] = Json.format[ResponseCommon]
+  implicit val jsonConfig: Aux[Json.MacroOptions] = JsonConfiguration(naming = JsonNaming.PascalCase)
+  implicit val format: OFormat[ResponseCommon]    = Json.format[ResponseCommon]
 }

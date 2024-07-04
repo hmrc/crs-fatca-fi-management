@@ -64,8 +64,8 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
 
         forAll(arbitrary[ViewFIDetailsResponse], arbitrary[FIDetail]) {
           (response, fiDetail) =>
-            val subscriptionId  = fiDetail.SubscriptionID
-            val stubbedResponse = response.modify(_.ViewFIDetails.ResponseDetails.FIDetails).setTo(List(fiDetail))
+            val subscriptionId  = fiDetail.subscriptionID
+            val stubbedResponse = response.modify(_.viewFIDetails.responseDetails.fIDetails).setTo(List(fiDetail))
 
             stubResponse(
               url = s"/ASMService/v1/VIEW/$subscriptionId",
@@ -87,7 +87,7 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
 
             forAll(arbitrary[FIDetail]) {
               fiDetail =>
-                val subscriptionId = fiDetail.SubscriptionID
+                val subscriptionId = fiDetail.subscriptionID
 
                 stubResponse(
                   url = s"/ASMService/v1/VIEW/$subscriptionId",
@@ -108,9 +108,9 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
 
         forAll(arbitrary[ViewFIDetailsResponse], arbitrary[FIDetail]) {
           (response, fiDetail) =>
-            val subscriptionId  = fiDetail.SubscriptionID
-            val fiId            = fiDetail.FIID
-            val stubbedResponse = response.modify(_.ViewFIDetails.ResponseDetails.FIDetails).setTo(List(fiDetail))
+            val subscriptionId  = fiDetail.subscriptionID
+            val fiId            = fiDetail.fIID
+            val stubbedResponse = response.modify(_.viewFIDetails.responseDetails.fIDetails).setTo(List(fiDetail))
 
             stubResponse(
               url = s"/ASMService/v1/VIEW/$subscriptionId/$fiId",
@@ -132,8 +132,8 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
 
             forAll(arbitrary[FIDetail]) {
               fiDetail =>
-                val subscriptionId = fiDetail.SubscriptionID
-                val fiId           = fiDetail.FIID
+                val subscriptionId = fiDetail.subscriptionID
+                val fiId           = fiDetail.fIID
 
                 stubResponse(
                   url = s"/ASMService/v1/VIEW/$subscriptionId/$fiId",

@@ -16,17 +16,19 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models.error
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.JsonConfiguration.Aux
+import play.api.libs.json.{Json, JsonConfiguration, JsonNaming, OFormat}
 
 final case class ErrorDetail(
-  Timestamp: String,
-  CorrelationId: String,
-  ErrorCode: Option[String],
-  ErrorMessage: Option[String],
-  Source: Option[String],
-  SourceFaultDetail: Option[SourceFaultDetail]
+  timestamp: String,
+  correlationId: String,
+  errorCode: Option[String],
+  errorMessage: Option[String],
+  source: Option[String],
+  sourceFaultDetail: Option[SourceFaultDetail]
 )
 
 object ErrorDetail {
-  implicit val format: OFormat[ErrorDetail] = Json.format[ErrorDetail]
+  implicit val jsonConfig: Aux[Json.MacroOptions] = JsonConfiguration(naming = JsonNaming.PascalCase)
+  implicit val format: OFormat[ErrorDetail]       = Json.format[ErrorDetail]
 }

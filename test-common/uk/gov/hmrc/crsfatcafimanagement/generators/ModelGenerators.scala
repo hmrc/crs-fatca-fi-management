@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,15 +74,15 @@ trait ModelGenerators {
       primaryContactDetails   <- arbitrary[ContactDetails]
       secondaryContactDetails <- arbitrary[ContactDetails]
     } yield FIDetail(
-      FIID = fiId,
-      FIName = fiName,
-      SubscriptionID = subscriptionId,
-      TINDetails = tinDetails,
-      IsFIUser = isFIUser,
-      IsFATCAReporting = isFATCAReporting,
-      AddressDetails = addressDetails,
-      PrimaryContactDetails = primaryContactDetails,
-      SecondaryContactDetails = secondaryContactDetails
+      fIID = fiId,
+      fIName = fiName,
+      subscriptionID = subscriptionId,
+      tINDetails = tinDetails,
+      isFIUser = isFIUser,
+      isFATCAReporting = isFATCAReporting,
+      addressDetails = addressDetails,
+      primaryContactDetails = primaryContactDetails,
+      secondaryContactDetails = secondaryContactDetails
     )
   }
 

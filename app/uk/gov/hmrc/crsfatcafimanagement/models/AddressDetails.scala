@@ -16,17 +16,19 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.JsonConfiguration.Aux
+import play.api.libs.json.{Json, JsonConfiguration, JsonNaming, OFormat}
 
 final case class AddressDetails(
-  AddressLine1: String,
-  AddressLine2: String,
-  AddressLine3: String,
-  AddressLine4: Option[String],
-  CountryCode: Option[String],
-  PostalCode: Option[String]
+  addressLine1: String,
+  addressLine2: String,
+  addressLine3: String,
+  addressLine4: Option[String],
+  countryCode: Option[String],
+  postalCode: Option[String]
 )
 
 object AddressDetails {
-  implicit val format: OFormat[AddressDetails] = Json.format[AddressDetails]
+  implicit val jsonConfig: Aux[Json.MacroOptions] = JsonConfiguration(naming = JsonNaming.PascalCase)
+  implicit val format: OFormat[AddressDetails]    = Json.format[AddressDetails]
 }

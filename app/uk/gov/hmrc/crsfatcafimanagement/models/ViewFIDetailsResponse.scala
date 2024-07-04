@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.JsonConfiguration.Aux
+import play.api.libs.json.{Json, JsonConfiguration, JsonNaming, OFormat}
 
-final case class ViewFIDetailsResponse(ViewFIDetails: ViewFIDetails)
+final case class ViewFIDetailsResponse(viewFIDetails: ViewFIDetails)
 
 object ViewFIDetailsResponse {
+  implicit val jsonConfig: Aux[Json.MacroOptions]     = JsonConfiguration(naming = JsonNaming.PascalCase)
   implicit val format: OFormat[ViewFIDetailsResponse] = Json.format[ViewFIDetailsResponse]
 }
