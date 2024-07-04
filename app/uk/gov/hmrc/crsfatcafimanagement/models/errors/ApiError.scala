@@ -18,6 +18,4 @@ package uk.gov.hmrc.crsfatcafimanagement.models.errors
 
 sealed trait ApiError
 
-
-
 case class CreateSubmissionError(status: Int) extends ApiError

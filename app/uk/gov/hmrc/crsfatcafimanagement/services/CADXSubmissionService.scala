@@ -26,18 +26,19 @@ import uk.gov.hmrc.http.HeaderCarrier
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CADXSubmissionService @Inject()(connector: CADXConnector) extends Logging {
+class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging {
 
   def createFI(
-    viewFIDetails: CreateFIDetailsRequest
+    createFIDetails: CreateFIDetailsRequest
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[CreateSubmissionError, Unit]] =
-//change this to ViewFIDetailsRequest when implemented
-    connector.createFI(viewFIDetails).map { res =>
-      res.status match {
-        case OK => Right(())
-        case status =>
-          logger.warn(s"create submission Got Status $status")
-          Left(CreateSubmissionError(status))
-      }
+    connector.createFI(createFIDetails).map {
+      res =>
+        res.status match {
+          case OK => Right(())
+          case status =>
+            logger.warn(s"create submission Got Status $status")
+            Left(CreateSubmissionError(status))
+        }
     }
+
 }

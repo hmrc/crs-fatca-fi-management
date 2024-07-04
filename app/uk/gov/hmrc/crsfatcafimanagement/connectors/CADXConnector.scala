@@ -33,7 +33,6 @@ class CADXConnector @Inject() (
   val http: HttpClientV2
 ) {
 
-  //amend this to request model when implemented
   def createFI(submissionDetails: CreateFIDetailsRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
     val serviceName = "submission"
 

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.crsfatcafimanagement.models.CreateFIDetails
 
 final case class CreateFIDetailsRequest(FIManagementType: CreateFIDetails)
 

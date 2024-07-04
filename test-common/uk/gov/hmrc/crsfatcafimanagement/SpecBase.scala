@@ -17,7 +17,7 @@
 package uk.gov.hmrc.crsfatcafimanagement
 
 import org.mockito.MockitoSugar
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -35,6 +35,7 @@ trait SpecBase
     with OptionValues
     with TryValues
     with ScalaFutures
+    with IntegrationPatience
     with MockitoSugar
     with BeforeAndAfterEach
     with BeforeAndAfterAll

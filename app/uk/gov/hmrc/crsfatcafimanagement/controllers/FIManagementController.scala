@@ -38,21 +38,24 @@ class FIManagementController @Inject() (
     extends BackendController(controllerComponents)
     with Logging {
 
-  def createSubmission(): Action[JsValue] = authenticator.authenticateAll.async(parse.json) { implicit request =>
-    //Change below to ViewFIDetailsRequest when implemented
-    request.body.validate[CreateFIDetailsRequest].fold(
-      invalid =>
-        Future.successful {
-          logger.warn(s" createSubmission Json Validation Failed: $invalid")
-          InternalServerError("Json Validation Failed")
-        },
-      validReq =>
-        service.createFI(validReq).map {
-          case Right(_) => Ok
-          case Left(CreateSubmissionError(value)) =>
-            logger.warn(s"CreateSubmissionError $value")
-            InternalServerError(s"CreateSubmissionError $value")
-        }
-    )
+  def createSubmission(): Action[JsValue] = authenticator.authenticateAll.async(parse.json) {
+    implicit request =>
+      request.body
+        .validate[CreateFIDetailsRequest]
+        .fold(
+          invalid =>
+            Future.successful {
+              logger.warn(s" createSubmission Json Validation Failed: $invalid")
+              InternalServerError("Json Validation Failed")
+            },
+          validReq =>
+            service.createFI(validReq).map {
+              case Right(_) => Ok
+              case Left(CreateSubmissionError(value)) =>
+                logger.warn(s"CreateSubmissionError $value")
+                InternalServerError(s"CreateSubmissionError $value")
+            }
+        )
   }
+
 }

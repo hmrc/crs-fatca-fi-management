@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 
-import akka.io.dns.DnsProtocol.RequestType
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.crsfatcafimanagement.models.RequestType
 
 final case class RequestCommon(
   OriginatingSystem: String,
   TransmittingSystem: String,
   RequestType: RequestType,
   Regime: String,
-  ResponseParameters: List[RequestParameter]
+  RequestParameters: List[RequestParameter]
 )
 
 object RequestCommon {

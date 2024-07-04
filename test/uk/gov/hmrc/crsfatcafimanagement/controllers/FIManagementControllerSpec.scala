@@ -23,13 +23,14 @@ import play.api.http.Status.OK
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{POST, route, status}
+import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.crsfatcafimanagement.SpecBase
 import uk.gov.hmrc.crsfatcafimanagement.auth.{AllowAllAuthAction, FakeAllowAllAuthAction}
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.CreateFIDetailsRequest
+import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
 import uk.gov.hmrc.crsfatcafimanagement.services.CADXSubmissionService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -37,9 +38,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class FIManagementControllerSpec extends SpecBase with Generators with ScalaCheckPropertyChecks {
 
-  val mockAuthConnector: AuthConnector = mock[AuthConnector]
-
-  val mockCADXConnector: CADXConnector = mock[CADXConnector]
+  val mockAuthConnector: AuthConnector                 = mock[AuthConnector]
+  val mockCADXConnector: CADXConnector                 = mock[CADXConnector]
   val mockCADXSubmissionService: CADXSubmissionService = mock[CADXSubmissionService]
 
   val application: Application = applicationBuilder()
@@ -107,6 +107,31 @@ class FIManagementControllerSpec extends SpecBase with Generators with ScalaChec
       |}""".stripMargin
   )
 
+  val invalidFiDetailsRequestJson: JsValue = Json.parse(
+    """
+      |{
+      |  "FIManagementType": {
+      |    "RequestCommon": {
+      |      "TransmittingSystem": "192.168.1.1",
+      |      "OriginatingSystem": "192.168.1.2",
+      |      "RequestType": "CREATE",
+      |      "Regime": "CRSFATCA",
+      |      "RequestParameters": [
+      |        {
+      |          "ParamName": "ExampleParam1",
+      |          "ParamValue": "Value1"
+      |        },
+      |        {
+      |          "ParamName": "ExampleParam2",
+      |          "ParamValue": "Value2"
+      |        }
+      |      ]
+      |    },
+      |    "RequestDetails": {
+      |    }
+      |  }
+      |}""".stripMargin
+  )
 
   "should return OK when UpdateSubscription was successful" in {
     when(
@@ -129,6 +154,54 @@ class FIManagementControllerSpec extends SpecBase with Generators with ScalaChec
 
     val result = route(application, request).value
     status(result) mustEqual OK
+
+  }
+
+  "should return 500 with a json validation error when receiving invalid json" in {
+    when(
+      mockCADXSubmissionService
+        .createFI(any[CreateFIDetailsRequest]())(
+          any[HeaderCarrier](),
+          any[ExecutionContext]()
+        )
+    ).thenReturn(
+      Future.successful(
+        Right(())
+      )
+    )
+
+    val request =
+      FakeRequest(
+        POST,
+        routes.FIManagementController.createSubmission.url
+      ).withJsonBody(invalidFiDetailsRequestJson)
+
+    val result = route(application, request).value
+    status(result) mustEqual INTERNAL_SERVER_ERROR
+
+  }
+
+  "should return a create submission error when not able to create FI" in {
+    when(
+      mockCADXSubmissionService
+        .createFI(any[CreateFIDetailsRequest]())(
+          any[HeaderCarrier](),
+          any[ExecutionContext]()
+        )
+    ).thenReturn(
+      Future.successful(
+        Left(CreateSubmissionError(401))
+      )
+    )
+
+    val request =
+      FakeRequest(
+        POST,
+        routes.FIManagementController.createSubmission.url
+      ).withJsonBody(fiDetailsRequestJson)
+
+    val result = route(application, request).value
+    status(result) mustEqual INTERNAL_SERVER_ERROR
 
   }
 

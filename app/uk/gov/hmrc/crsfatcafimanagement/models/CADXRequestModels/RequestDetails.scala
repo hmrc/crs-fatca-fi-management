@@ -17,9 +17,19 @@
 package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.crsfatcafimanagement.models.FIDetail
+import uk.gov.hmrc.crsfatcafimanagement.models.{AddressDetails, ContactDetails, FIDetail, TINDetails}
 
-final case class RequestDetails(FIDetails: List[FIDetail])
+final case class RequestDetails(
+  FIID: String,
+  FIName: String,
+  SubscriptionID: String,
+  TINDetails: List[TINDetails],
+  IsFIUser: Boolean,
+  IsFATCAReporting: Boolean,
+  AddressDetails: AddressDetails,
+  PrimaryContactDetails: ContactDetails,
+  SecondaryContactDetails: ContactDetails
+)
 
 object RequestDetails {
   implicit val format: OFormat[RequestDetails] = Json.format[RequestDetails]
