@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.crsfatcafimanagement.models
+package uk.gov.hmrc.crsfatcafimanagement.models.common
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.crsfatcafimanagement.models.RequestType
 
 final case class ResponseCommon(
   OriginatingSystem: String,

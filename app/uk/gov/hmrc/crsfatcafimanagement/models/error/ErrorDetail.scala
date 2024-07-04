@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.crsfatcafimanagement.models
+package uk.gov.hmrc.crsfatcafimanagement.models.error
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.crsfatcafimanagement.models.common.{ResponseCommon, ResponseDetails}
 
-final case class ViewFIDetails(ResponseCommon: ResponseCommon, ResponseDetails: ResponseDetails)
+final case class ErrorDetail(
+  Timestamp: String,
+  CorrelationId: String,
+  ErrorCode: Option[String],
+  ErrorMessage: Option[String],
+  Source: Option[String],
+  SourceFaultDetail: Option[SourceFaultDetail]
+)
 
-object ViewFIDetails {
-  implicit val format: OFormat[ViewFIDetails] = Json.format[ViewFIDetails]
+object ErrorDetail {
+  implicit val format: OFormat[ErrorDetail] = Json.format[ErrorDetail]
 }

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.crsfatcafimanagement.models
+package uk.gov.hmrc.crsfatcafimanagement.models.common
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.crsfatcafimanagement.models.common.{ResponseCommon, ResponseDetails}
 
-final case class ViewFIDetails(ResponseCommon: ResponseCommon, ResponseDetails: ResponseDetails)
+final case class ResponseParameter(ParamName: String, ParamValue: String)
 
-object ViewFIDetails {
-  implicit val format: OFormat[ViewFIDetails] = Json.format[ViewFIDetails]
+object ResponseParameter {
+  implicit val format: OFormat[ResponseParameter] = Json.format[ResponseParameter]
 }

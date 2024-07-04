@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.crsfatcafimanagement.config
+package uk.gov.hmrc.crsfatcafimanagement.models.error
 
-import com.google.inject.AbstractModule
+import play.api.libs.json.{Json, OFormat}
 
-class Module extends AbstractModule {
+final case class SourceFaultDetail(Detail: Seq[String], RestFault: Option[String], SoapFault: Option[String])
 
-  override def configure(): Unit =
-    bind(classOf[AppConfig]).asEagerSingleton()
-
+object SourceFaultDetail {
+  implicit val format: OFormat[SourceFaultDetail] = Json.format[SourceFaultDetail]
 }

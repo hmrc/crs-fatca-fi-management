@@ -19,7 +19,9 @@ package uk.gov.hmrc.crsfatcafimanagement.generators
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.listOf
 import org.scalacheck.{Arbitrary, Gen}
-import uk.gov.hmrc.crsfatcafimanagement.models._
+import uk.gov.hmrc.crsfatcafimanagement.models.{common, _}
+import uk.gov.hmrc.crsfatcafimanagement.models.common.{ResponseCommon, ResponseDetails, ResponseParameter}
+import uk.gov.hmrc.crsfatcafimanagement.models.error.{ErrorDetail, ErrorDetails, SourceFaultDetail}
 
 trait ModelGenerators {
   self: Generators =>
@@ -103,7 +105,7 @@ trait ModelGenerators {
       requestType = RequestType.VIEW
       regime      = "CRSFATCA"
       responseParameters <- listOf(arbitrary[ResponseParameter])
-    } yield ResponseCommon(
+    } yield common.ResponseCommon(
       originatingSystem,
       transmittingSystem,
       requestType,
@@ -122,6 +124,32 @@ trait ModelGenerators {
   implicit val arbitraryViewFIDetailsResponse: Arbitrary[ViewFIDetailsResponse] =
     Arbitrary {
       arbitrary[ViewFIDetails].map(ViewFIDetailsResponse.apply)
+    }
+
+  implicit val arbitrarySourceFaultDetail: Arbitrary[SourceFaultDetail] =
+    Arbitrary {
+      for {
+        detail    <- listOf(stringOfLength(35))
+        restFault <- Gen.option(stringOfLength(35))
+        soapFault <- Gen.option(stringOfLength(35))
+      } yield SourceFaultDetail(detail, restFault, soapFault)
+    }
+
+  implicit val arbitraryErrorDetail: Arbitrary[ErrorDetail] =
+    Arbitrary {
+      for {
+        timestamp         <- stringOfLength(35)
+        correlationId     <- stringOfLength(36)
+        errorCode         <- Gen.option(stringOfLength(35))
+        errorMessage      <- Gen.option(stringOfLength(255))
+        source            <- Gen.option(stringOfLength(40))
+        sourceFaultDetail <- Gen.option(arbitrary[SourceFaultDetail])
+      } yield ErrorDetail(timestamp, correlationId, errorCode, errorMessage, source, sourceFaultDetail)
+    }
+
+  implicit val arbitraryErrorErrorResponse: Arbitrary[ErrorDetails] =
+    Arbitrary {
+      arbitrary[ErrorDetail].map(ErrorDetails.apply)
     }
 
 }

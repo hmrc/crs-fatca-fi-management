@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.crsfatcafimanagement.models
+package uk.gov.hmrc.crsfatcafimanagement.models.error
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class ResponseDetails(FIDetails: List[FIDetail])
+final case class ErrorDetails(ErrorDetail: ErrorDetail)
 
-object ResponseDetails {
-  implicit val format: OFormat[ResponseDetails] = Json.format[ResponseDetails]
+object ErrorDetails {
+  implicit val format: OFormat[ErrorDetails] = Json.format[ErrorDetails]
 }
