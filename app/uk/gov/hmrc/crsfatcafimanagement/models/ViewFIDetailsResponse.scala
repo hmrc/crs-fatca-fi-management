@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.crsfatcafimanagement.config
+package uk.gov.hmrc.crsfatcafimanagement.models
 
-import com.google.inject.AbstractModule
+import play.api.libs.json.JsonConfiguration.Aux
+import play.api.libs.json.{Json, JsonConfiguration, JsonNaming, OFormat}
 
-class Module extends AbstractModule {
+final case class ViewFIDetailsResponse(viewFIDetails: ViewFIDetails)
 
-  override def configure(): Unit =
-    bind(classOf[AppConfig]).asEagerSingleton()
-
+object ViewFIDetailsResponse {
+  implicit val jsonConfig: Aux[Json.MacroOptions]     = JsonConfiguration(naming = JsonNaming.PascalCase)
+  implicit val format: OFormat[ViewFIDetailsResponse] = Json.format[ViewFIDetailsResponse]
 }
