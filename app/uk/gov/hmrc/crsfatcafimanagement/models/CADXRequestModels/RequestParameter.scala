@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.JsonConfiguration.Aux
+import play.api.libs.json.{Json, JsonConfiguration, JsonNaming, OFormat}
 
-final case class RequestParameter(ParamName: String, ParamValue: String)
+final case class RequestParameter(paramName: String, paramValue: String)
 
 object RequestParameter {
-  implicit val format: OFormat[RequestParameter] = Json.format[RequestParameter]
+  implicit val jsonConfig: Aux[Json.MacroOptions] = JsonConfiguration(naming = JsonNaming.PascalCase)
+  implicit val format: OFormat[RequestParameter]  = Json.format[RequestParameter]
 }

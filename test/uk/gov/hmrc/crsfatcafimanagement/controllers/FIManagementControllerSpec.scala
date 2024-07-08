@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.controllers
 
-import org.mockito.ArgumentMatchers.any
+import com.softwaremill.quicklens._
+import org.mockito.ArgumentMatchers.{any, eq => mockitoEq}
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.http.Status.OK
@@ -30,9 +32,11 @@ import uk.gov.hmrc.crsfatcafimanagement.auth.{AllowAllAuthAction, FakeAllowAllAu
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.CreateFIDetailsRequest
+import uk.gov.hmrc.crsfatcafimanagement.models.error.ErrorDetails
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
+import uk.gov.hmrc.crsfatcafimanagement.models.{FIDetail, ViewFIDetailsResponse}
 import uk.gov.hmrc.crsfatcafimanagement.services.CADXSubmissionService
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -50,6 +54,15 @@ class FIManagementControllerSpec extends SpecBase with Generators with ScalaChec
       bind[AllowAllAuthAction].to[FakeAllowAllAuthAction]
     )
     .build()
+
+  private val errorStatusCodes = Table(
+    "connectorErrorCode",
+    FORBIDDEN,
+    NOT_FOUND,
+    SERVICE_UNAVAILABLE,
+    INTERNAL_SERVER_ERROR,
+    METHOD_NOT_ALLOWED
+  )
 
   val fiDetailsRequestJson: JsValue = Json.parse(
     """
@@ -133,76 +146,197 @@ class FIManagementControllerSpec extends SpecBase with Generators with ScalaChec
       |}""".stripMargin
   )
 
-  "should return OK when UpdateSubscription was successful" in {
-    when(
-      mockCADXSubmissionService
-        .createFI(any[CreateFIDetailsRequest]())(
-          any[HeaderCarrier](),
-          any[ExecutionContext]()
+  "FIManagementController" - {
+
+    "listFinancialInstitutions" - {
+      "must return OK when connector returns FIs" in {
+        forAll(arbitrary[ViewFIDetailsResponse], arbitrary[FIDetail]) {
+          (response, fiDetail) =>
+            val subscriptionId  = fiDetail.subscriptionID
+            val stubbedResponse = response.modify(_.viewFIDetails.responseDetails.fIDetails).setTo(List(fiDetail))
+
+            when(
+              mockCADXConnector
+                .listFinancialInstitutions(mockitoEq(subscriptionId))(any[HeaderCarrier](), any[ExecutionContext]())
+            ).thenReturn(Future.successful(HttpResponse(OK, Json.toJson(stubbedResponse), Map.empty)))
+
+            val request = FakeRequest(GET, routes.FIManagementController.listFinancialInstitutions(subscriptionId).url)
+
+            val result = route(app, request).value
+            status(result) mustEqual OK
+            contentAsJson(result) mustBe Json.toJson(stubbedResponse)
+        }
+      }
+
+      "must handle UNPROCESSABLE_ENTITY error response returned by the connector" in {
+        forAll(arbitrary[ErrorDetails], arbitrary[FIDetail]) {
+          (errorResponse, fiDetail) =>
+            val subscriptionId = fiDetail.subscriptionID
+
+            when(
+              mockCADXConnector
+                .listFinancialInstitutions(any[String])(any[HeaderCarrier](), any[ExecutionContext]())
+            ).thenReturn(Future.successful(HttpResponse(UNPROCESSABLE_ENTITY, Json.toJson(errorResponse), Map.empty)))
+
+            val request = FakeRequest(GET, routes.FIManagementController.listFinancialInstitutions(subscriptionId).url)
+            val result  = route(app, request).value
+            status(result) mustEqual UNPROCESSABLE_ENTITY
+            contentAsJson(result) mustBe Json.toJson(errorResponse)
+        }
+      }
+
+      forAll(errorStatusCodes) {
+        errorStatusCode =>
+          s"must return $errorStatusCode when connector returns $errorStatusCode" in {
+            forAll(validSubscriptionID) {
+              subscriptionId =>
+                when(
+                  mockCADXConnector
+                    .listFinancialInstitutions(any[String])(any[HeaderCarrier](), any[ExecutionContext]())
+                ).thenReturn(Future.successful(HttpResponse(errorStatusCode, Json.obj(), Map.empty)))
+
+                val request = FakeRequest(GET, routes.FIManagementController.listFinancialInstitutions(subscriptionId).url)
+
+                val result = route(app, request).value
+                status(result) mustEqual errorStatusCode
+            }
+          }
+      }
+    }
+
+    "viewFinancialInstitution" - {
+      "must return OK when connector returns requested FI" in {
+        forAll(arbitrary[ViewFIDetailsResponse], arbitrary[FIDetail]) {
+          (response, fiDetail) =>
+            val subscriptionId  = fiDetail.subscriptionID
+            val fiId            = fiDetail.fIID
+            val stubbedResponse = response.modify(_.viewFIDetails.responseDetails.fIDetails).setTo(List(fiDetail))
+            when(
+              mockCADXConnector
+                .viewFinancialInstitution(mockitoEq(subscriptionId), mockitoEq(fiId))(any[HeaderCarrier](), any[ExecutionContext]())
+            ).thenReturn(Future.successful(HttpResponse(OK, Json.toJson(stubbedResponse), Map.empty)))
+            val request = FakeRequest(GET, routes.FIManagementController.viewFinancialInstitution(subscriptionId, fiId).url)
+
+            val result = route(app, request).value
+            status(result) mustEqual OK
+            contentAsJson(result) mustBe Json.toJson(stubbedResponse)
+        }
+      }
+
+      "must handle UNPROCESSABLE_ENTITY error response returned by the connector" in {
+        forAll(arbitrary[ErrorDetails], arbitrary[FIDetail]) {
+          (errorResponse, fiDetail) =>
+            val subscriptionId = fiDetail.subscriptionID
+            val fiId           = fiDetail.fIID
+
+            when(
+              mockCADXConnector
+                .viewFinancialInstitution(any[String], any[String])(any[HeaderCarrier](), any[ExecutionContext]())
+            ).thenReturn(Future.successful(HttpResponse(UNPROCESSABLE_ENTITY, Json.toJson(errorResponse), Map.empty)))
+
+            val request = FakeRequest(GET, routes.FIManagementController.viewFinancialInstitution(subscriptionId, fiId).url)
+
+            val result = route(app, request).value
+            status(result) mustEqual UNPROCESSABLE_ENTITY
+            contentAsJson(result) mustBe Json.toJson(errorResponse)
+        }
+      }
+
+      forAll(errorStatusCodes) {
+        errorStatusCode =>
+          s"must return $errorStatusCode when connector returns $errorStatusCode" in {
+            forAll(arbitrary[FIDetail]) {
+              fiDetail =>
+                val subscriptionId = fiDetail.subscriptionID
+                val fiId           = fiDetail.fIID
+
+                when(
+                  mockCADXConnector
+                    .viewFinancialInstitution(any[String], any[String])(any[HeaderCarrier](), any[ExecutionContext]())
+                ).thenReturn(Future.successful(HttpResponse(errorStatusCode, Json.obj(), Map.empty)))
+
+                val request = FakeRequest(GET, routes.FIManagementController.viewFinancialInstitution(subscriptionId, fiId).url)
+
+                val result = route(app, request).value
+                status(result) mustEqual errorStatusCode
+            }
+          }
+      }
+    }
+
+    "createFinancialInstitution" - {
+      "must return OK when UpdateSubscription was successful" in {
+        when(
+          mockCADXSubmissionService
+            .createFI(any[CreateFIDetailsRequest]())(
+              any[HeaderCarrier](),
+              any[ExecutionContext]()
+            )
+        ).thenReturn(
+          Future.successful(
+            Right(())
+          )
         )
-    ).thenReturn(
-      Future.successful(
-        Right(())
-      )
-    )
 
-    val request =
-      FakeRequest(
-        POST,
-        routes.FIManagementController.createSubmission.url
-      ).withJsonBody(fiDetailsRequestJson)
+        val request =
+          FakeRequest(
+            POST,
+            routes.FIManagementController.createsFinancialInstitutions.url
+          ).withJsonBody(fiDetailsRequestJson)
 
-    val result = route(application, request).value
-    status(result) mustEqual OK
+        val result = route(application, request).value
+        status(result) mustEqual OK
 
-  }
+      }
 
-  "should return 500 with a json validation error when receiving invalid json" in {
-    when(
-      mockCADXSubmissionService
-        .createFI(any[CreateFIDetailsRequest]())(
-          any[HeaderCarrier](),
-          any[ExecutionContext]()
+      "must return 500 with a json validation error when receiving invalid json" in {
+        when(
+          mockCADXSubmissionService
+            .createFI(any[CreateFIDetailsRequest]())(
+              any[HeaderCarrier](),
+              any[ExecutionContext]()
+            )
+        ).thenReturn(
+          Future.successful(
+            Right(())
+          )
         )
-    ).thenReturn(
-      Future.successful(
-        Right(())
-      )
-    )
 
-    val request =
-      FakeRequest(
-        POST,
-        routes.FIManagementController.createSubmission.url
-      ).withJsonBody(invalidFiDetailsRequestJson)
+        val request =
+          FakeRequest(
+            POST,
+            routes.FIManagementController.createsFinancialInstitutions.url
+          ).withJsonBody(invalidFiDetailsRequestJson)
 
-    val result = route(application, request).value
-    status(result) mustEqual INTERNAL_SERVER_ERROR
+        val result = route(application, request).value
+        status(result) mustEqual INTERNAL_SERVER_ERROR
 
-  }
+      }
 
-  "should return a create submission error when not able to create FI" in {
-    when(
-      mockCADXSubmissionService
-        .createFI(any[CreateFIDetailsRequest]())(
-          any[HeaderCarrier](),
-          any[ExecutionContext]()
+      "must return a create submission error when not able to create FI" in {
+        when(
+          mockCADXSubmissionService
+            .createFI(any[CreateFIDetailsRequest]())(
+              any[HeaderCarrier](),
+              any[ExecutionContext]()
+            )
+        ).thenReturn(
+          Future.successful(
+            Left(CreateSubmissionError(401))
+          )
         )
-    ).thenReturn(
-      Future.successful(
-        Left(CreateSubmissionError(401))
-      )
-    )
 
-    val request =
-      FakeRequest(
-        POST,
-        routes.FIManagementController.createSubmission.url
-      ).withJsonBody(fiDetailsRequestJson)
+        val request =
+          FakeRequest(
+            POST,
+            routes.FIManagementController.createsFinancialInstitutions.url
+          ).withJsonBody(fiDetailsRequestJson)
 
-    val result = route(application, request).value
-    status(result) mustEqual INTERNAL_SERVER_ERROR
+        val result = route(application, request).value
+        status(result) mustEqual INTERNAL_SERVER_ERROR
 
+      }
+    }
   }
 
 }

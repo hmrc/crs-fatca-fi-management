@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package uk.gov.hmrc.crsfatcafimanagement.generators
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.listOf
 import org.scalacheck.{Arbitrary, Gen}
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateFIDetails, CreateFIDetailsRequest, RequestCommon, RequestDetails, RequestParameter}
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels._
+import uk.gov.hmrc.crsfatcafimanagement.models.common.{ResponseCommon, ResponseDetails, ResponseParameter}
+import uk.gov.hmrc.crsfatcafimanagement.models.error.{ErrorDetail, ErrorDetails, SourceFaultDetail}
 import uk.gov.hmrc.crsfatcafimanagement.models._
 
 trait ModelGenerators {
@@ -73,15 +75,15 @@ trait ModelGenerators {
       primaryContactDetails   <- arbitrary[ContactDetails]
       secondaryContactDetails <- arbitrary[ContactDetails]
     } yield FIDetail(
-      FIID = fiId,
-      FIName = fiName,
-      SubscriptionID = subscriptionId,
-      TINDetails = tinDetails,
-      IsFIUser = isFIUser,
-      IsFATCAReporting = isFATCAReporting,
-      AddressDetails = addressDetails,
-      PrimaryContactDetails = primaryContactDetails,
-      SecondaryContactDetails = secondaryContactDetails
+      fIID = fiId,
+      fIName = fiName,
+      subscriptionID = subscriptionId,
+      tINDetails = tinDetails,
+      isFIUser = isFIUser,
+      isFATCAReporting = isFATCAReporting,
+      addressDetails = addressDetails,
+      primaryContactDetails = primaryContactDetails,
+      secondaryContactDetails = secondaryContactDetails
     )
   }
 
@@ -173,16 +175,42 @@ trait ModelGenerators {
       primaryContactDetails   <- arbitrary[ContactDetails]
       secondaryContactDetails <- arbitrary[ContactDetails]
     } yield RequestDetails(
-      FIID = fiId,
-      FIName = fiName,
-      SubscriptionID = subscriptionId,
-      TINDetails = List(tinDetails),
-      IsFIUser = isFIUser,
-      IsFATCAReporting = isFATCAReporting,
-      AddressDetails = addressDetails,
-      PrimaryContactDetails = primaryContactDetails,
-      SecondaryContactDetails = secondaryContactDetails
+      fIID = fiId,
+      fIName = fiName,
+      subscriptionID = subscriptionId,
+      tinDetails = List(tinDetails),
+      isFIUser = isFIUser,
+      isFATCAReporting = isFATCAReporting,
+      addressDetails = addressDetails,
+      primaryContactDetails = primaryContactDetails,
+      secondaryContactDetails = secondaryContactDetails
     )
   }
+
+  implicit val arbitrarySourceFaultDetail: Arbitrary[SourceFaultDetail] =
+    Arbitrary {
+      for {
+        detail    <- listOf(stringOfLength(35))
+        restFault <- Gen.option(stringOfLength(35))
+        soapFault <- Gen.option(stringOfLength(35))
+      } yield SourceFaultDetail(detail, restFault, soapFault)
+    }
+
+  implicit val arbitraryErrorDetail: Arbitrary[ErrorDetail] =
+    Arbitrary {
+      for {
+        timestamp         <- stringOfLength(35)
+        correlationId     <- stringOfLength(36)
+        errorCode         <- Gen.option(stringOfLength(35))
+        errorMessage      <- Gen.option(stringOfLength(255))
+        source            <- Gen.option(stringOfLength(40))
+        sourceFaultDetail <- Gen.option(arbitrary[SourceFaultDetail])
+      } yield ErrorDetail(timestamp, correlationId, errorCode, errorMessage, source, sourceFaultDetail)
+    }
+
+  implicit val arbitraryErrorErrorResponse: Arbitrary[ErrorDetails] =
+    Arbitrary {
+      arbitrary[ErrorDetail].map(ErrorDetails.apply)
+    }
 
 }

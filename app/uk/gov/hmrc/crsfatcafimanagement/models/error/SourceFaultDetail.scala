@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.crsfatcafimanagement.models
+package uk.gov.hmrc.crsfatcafimanagement.models.error
 
 import play.api.libs.json.JsonConfiguration.Aux
 import play.api.libs.json.{Json, JsonConfiguration, JsonNaming, OFormat}
 
-final case class ViewFIDetailsResponse(viewFIDetails: ViewFIDetails)
+final case class SourceFaultDetail(detail: Seq[String], restFault: Option[String], soapFault: Option[String])
 
-object ViewFIDetailsResponse {
-  implicit val jsonConfig: Aux[Json.MacroOptions]     = JsonConfiguration(naming = JsonNaming.PascalCase)
-  implicit val format: OFormat[ViewFIDetailsResponse] = Json.format[ViewFIDetailsResponse]
+object SourceFaultDetail {
+  implicit val jsonConfig: Aux[Json.MacroOptions] = JsonConfiguration(naming = JsonNaming.PascalCase)
+  implicit val format: OFormat[SourceFaultDetail] = Json.format[SourceFaultDetail]
 }

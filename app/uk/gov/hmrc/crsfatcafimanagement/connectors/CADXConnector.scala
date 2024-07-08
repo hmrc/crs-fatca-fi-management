@@ -22,6 +22,7 @@ import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.CreateFIDetails
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HeaderNames, HttpReads, HttpResponse, StringContextOps}
 
+import java.net.URL
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -33,6 +34,9 @@ class CADXConnector @Inject() (
   val http: HttpClientV2
 ) {
 
+  implicit val httpReads: HttpReads[HttpResponse] =
+    (_: String, _: String, response: HttpResponse) => response
+
   def createFI(submissionDetails: CreateFIDetailsRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
     val serviceName = "submission"
 
@@ -43,8 +47,19 @@ class CADXConnector @Inject() (
       .execute[HttpResponse]
   }
 
-  implicit val httpReads: HttpReads[HttpResponse] =
-    (_: String, _: String, response: HttpResponse) => response
+  def listFinancialInstitutions(subscriptionId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
+    makeGetRequest(subscriptionId)
+
+  def viewFinancialInstitution(subscriptionId: String, fiId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
+    makeGetRequest(s"$subscriptionId/$fiId")
+
+  private def makeGetRequest(path: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+    val serviceName = "get-financial-institutions"
+    http
+      .get(new URL(s"${config.baseUrl(serviceName)}/$path"))
+      .setHeader(extraHeaders(config, serviceName): _*)
+      .execute
+  }
 
   private[connectors] def extraHeaders(
     config: AppConfig,
@@ -58,7 +73,7 @@ class CADXConnector @Inject() (
     )
   }
 
-  private def addHeaders(eisEnvironment: String)(implicit headerCarrier: HeaderCarrier): Seq[(String, String)] = {
+  private[connectors] def addHeaders(eisEnvironment: String)(implicit headerCarrier: HeaderCarrier): Seq[(String, String)] = {
     // HTTP-date format defined by RFC 7231 e.g. Fri, 01 Aug 2020 15:51:38 GMT+1
     val formatter                      = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss O")
     val stripSession: String => String = (input: String) => input.replace("session-", "")

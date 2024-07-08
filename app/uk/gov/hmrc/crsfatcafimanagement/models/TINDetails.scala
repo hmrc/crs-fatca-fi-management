@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.JsonConfiguration.Aux
+import play.api.libs.json.{Json, JsonConfiguration, JsonNaming, OFormat}
 
-final case class TINDetails(TINType: TINType, TIN: String, IssuedBy: String)
+final case class TINDetails(tINType: TINType, tIN: String, issuedBy: String)
 
 object TINDetails {
-  implicit val format: OFormat[TINDetails] = Json.format[TINDetails]
+  implicit val jsonConfig: Aux[Json.MacroOptions] = JsonConfiguration(naming = JsonNaming.PascalCase)
+  implicit val format: OFormat[TINDetails]        = Json.format[TINDetails]
 }

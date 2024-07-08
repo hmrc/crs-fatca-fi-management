@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package uk.gov.hmrc.crsfatcafimanagement
 
 import org.mockito.MockitoSugar
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -35,7 +35,6 @@ trait SpecBase
     with OptionValues
     with TryValues
     with ScalaFutures
-    with IntegrationPatience
     with MockitoSugar
     with BeforeAndAfterEach
     with BeforeAndAfterAll
@@ -46,9 +45,7 @@ trait SpecBase
 
   protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
-      .configure(
-        Configuration("metrics.enabled" -> false, "auditing.enabled" -> false)
-      )
+      .configure(Configuration("metrics.enabled" -> false, "auditing.enabled" -> false))
       .overrides()
 
 }
