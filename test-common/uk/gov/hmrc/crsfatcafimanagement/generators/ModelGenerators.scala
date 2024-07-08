@@ -106,7 +106,7 @@ trait ModelGenerators {
       requestType = RequestType.VIEW
       regime      = "CRSFATCA"
       responseParameters <- listOf(arbitrary[ResponseParameter])
-    } yield ResponseCommon(
+    } yield common.ResponseCommon(
       originatingSystem,
       transmittingSystem,
       requestType,
@@ -175,15 +175,15 @@ trait ModelGenerators {
       primaryContactDetails   <- arbitrary[ContactDetails]
       secondaryContactDetails <- arbitrary[ContactDetails]
     } yield RequestDetails(
-      fIID = fiId,
-      fIName = fiName,
-      subscriptionID = subscriptionId,
-      tinDetails = List(tinDetails),
-      isFIUser = isFIUser,
-      isFATCAReporting = isFATCAReporting,
-      addressDetails = addressDetails,
-      primaryContactDetails = primaryContactDetails,
-      secondaryContactDetails = secondaryContactDetails
+      FIID = fiId,
+      FIName = fiName,
+      SubscriptionID = subscriptionId,
+      TINDetails = List(tinDetails),
+      IsFIUser = isFIUser,
+      IsFATCAReporting = isFATCAReporting,
+      AddressDetails = addressDetails,
+      PrimaryContactDetails = primaryContactDetails,
+      SecondaryContactDetails = secondaryContactDetails
     )
   }
 

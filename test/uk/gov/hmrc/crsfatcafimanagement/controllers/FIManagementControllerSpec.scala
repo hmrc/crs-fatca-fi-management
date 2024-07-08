@@ -19,7 +19,6 @@ package uk.gov.hmrc.crsfatcafimanagement.controllers
 import com.softwaremill.quicklens._
 import org.mockito.ArgumentMatchers.{any, eq => mockitoEq}
 import org.scalacheck.Arbitrary.arbitrary
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.http.Status.OK
 import play.api.inject.bind
@@ -40,13 +39,13 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class FIManagementControllerSpec extends SpecBase with Generators with ScalaCheckPropertyChecks {
+class FIManagementControllerSpec extends SpecBase with Generators {
 
   val mockAuthConnector: AuthConnector                 = mock[AuthConnector]
   val mockCADXConnector: CADXConnector                 = mock[CADXConnector]
   val mockCADXSubmissionService: CADXSubmissionService = mock[CADXSubmissionService]
 
-  val application: Application = applicationBuilder()
+  override lazy val app: Application = applicationBuilder()
     .overrides(
       bind[CADXConnector].toInstance(mockCADXConnector),
       bind[CADXSubmissionService].toInstance(mockCADXSubmissionService),
@@ -284,7 +283,7 @@ class FIManagementControllerSpec extends SpecBase with Generators with ScalaChec
             routes.FIManagementController.createsFinancialInstitutions.url
           ).withJsonBody(fiDetailsRequestJson)
 
-        val result = route(application, request).value
+        val result = route(app, request).value
         status(result) mustEqual OK
 
       }
@@ -308,7 +307,7 @@ class FIManagementControllerSpec extends SpecBase with Generators with ScalaChec
             routes.FIManagementController.createsFinancialInstitutions.url
           ).withJsonBody(invalidFiDetailsRequestJson)
 
-        val result = route(application, request).value
+        val result = route(app, request).value
         status(result) mustEqual INTERNAL_SERVER_ERROR
 
       }
@@ -332,7 +331,7 @@ class FIManagementControllerSpec extends SpecBase with Generators with ScalaChec
             routes.FIManagementController.createsFinancialInstitutions.url
           ).withJsonBody(fiDetailsRequestJson)
 
-        val result = route(application, request).value
+        val result = route(app, request).value
         status(result) mustEqual INTERNAL_SERVER_ERROR
 
       }

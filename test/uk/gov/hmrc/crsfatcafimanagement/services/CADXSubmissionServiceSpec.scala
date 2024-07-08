@@ -37,72 +37,73 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
 
   val mockCADXConnector: CADXConnector = mock[CADXConnector]
 
-  "SubscriptionService" - {
-    val application = applicationBuilder()
-      .overrides(
-        bind[CADXConnector].toInstance(mockCADXConnector)
-      )
-      .build()
-
-    val fiDetailsRequestJson: JsValue = Json.parse(
-      """
-        |{
-        |  "FIManagementType": {
-        |    "RequestCommon": {
-        |      "TransmittingSystem": "192.168.1.1",
-        |      "OriginatingSystem": "192.168.1.2",
-        |      "RequestType": "CREATE",
-        |      "Regime": "CRSFATCA",
-        |      "RequestParameters": [
-        |        {
-        |          "ParamName": "ExampleParam1",
-        |          "ParamValue": "Value1"
-        |        },
-        |        {
-        |          "ParamName": "ExampleParam2",
-        |          "ParamValue": "Value2"
-        |        }
-        |      ]
-        |    },
-        |    "RequestDetails": {
-        |      "SubscriptionID": "123456789012345",
-        |      "FIID": "FI1234567890123",
-        |      "FIName": "Financial Institution",
-        |      "TINDetails": [
-        |        {
-        |          "TIN": "TIN123456789",
-        |          "TINType": "GIIN",
-        |          "IssuedBy": "US"
-        |        }
-        |      ],
-        |      "IsFIUser": false,
-        |      "IsFATCAReporting": true,
-        |      "PrimaryContactDetails": {
-        |        "PhoneNumber": "07123456789",
-        |        "ContactName": "John Doe",
-        |        "EmailAddress": "john.doe@example.com"
-        |      },
-        |      "SecondaryContactDetails": {
-        |        "PhoneNumber": "07876543210",
-        |        "ContactName": "Jane Doe",
-        |        "EmailAddress": "jane.doe@example.com"
-        |      },
-        |      "AddressDetails": {
-        |        "AddressLine1": "100 Sutton Street",
-        |        "AddressLine2": "Wokingham",
-        |        "AddressLine3": "Surrey",
-        |        "AddressLine4": "London",
-        |        "PostalCode": "DH14EJ",
-        |        "CountryCode": "GB"
-        |      }
-        |    }
-        |  }
-        |}""".stripMargin
+  override lazy val app = applicationBuilder()
+    .overrides(
+      bind[CADXConnector].toInstance(mockCADXConnector)
     )
-    val createFIDetailsRequest = fiDetailsRequestJson.as[CreateFIDetailsRequest]
+    .build()
 
+  val fiDetailsRequestJson: JsValue = Json.parse(
+    """
+      |{
+      |  "FIManagementType": {
+      |    "RequestCommon": {
+      |      "TransmittingSystem": "192.168.1.1",
+      |      "OriginatingSystem": "192.168.1.2",
+      |      "RequestType": "CREATE",
+      |      "Regime": "CRSFATCA",
+      |      "RequestParameters": [
+      |        {
+      |          "ParamName": "ExampleParam1",
+      |          "ParamValue": "Value1"
+      |        },
+      |        {
+      |          "ParamName": "ExampleParam2",
+      |          "ParamValue": "Value2"
+      |        }
+      |      ]
+      |    },
+      |    "RequestDetails": {
+      |      "SubscriptionID": "123456789012345",
+      |      "FIID": "FI1234567890123",
+      |      "FIName": "Financial Institution",
+      |      "TINDetails": [
+      |        {
+      |          "TIN": "TIN123456789",
+      |          "TINType": "GIIN",
+      |          "IssuedBy": "US"
+      |        }
+      |      ],
+      |      "IsFIUser": false,
+      |      "IsFATCAReporting": true,
+      |      "PrimaryContactDetails": {
+      |        "PhoneNumber": "07123456789",
+      |        "ContactName": "John Doe",
+      |        "EmailAddress": "john.doe@example.com"
+      |      },
+      |      "SecondaryContactDetails": {
+      |        "PhoneNumber": "07876543210",
+      |        "ContactName": "Jane Doe",
+      |        "EmailAddress": "jane.doe@example.com"
+      |      },
+      |      "AddressDetails": {
+      |        "AddressLine1": "100 Sutton Street",
+      |        "AddressLine2": "Wokingham",
+      |        "AddressLine3": "Surrey",
+      |        "AddressLine4": "London",
+      |        "PostalCode": "DH14EJ",
+      |        "CountryCode": "GB"
+      |      }
+      |    }
+      |  }
+      |}""".stripMargin
+  )
+
+  val createFIDetailsRequest: CreateFIDetailsRequest = fiDetailsRequestJson.as[CreateFIDetailsRequest]
+
+  "SubmissionService" - {
     "must  return UpdateSubscription with OK status when connector response with ok status" in {
-      val service = application.injector.instanceOf[CADXSubmissionService]
+      val service = app.injector.instanceOf[CADXSubmissionService]
 
       when(mockCADXConnector.createFI(any[CreateFIDetailsRequest]())(any[HeaderCarrier](), any[ExecutionContext]()))
         .thenReturn(Future.successful(HttpResponse(OK, "Good Response")))
@@ -117,7 +118,7 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
     }
 
     "must have UpdateSubscriptionError when connector response with not ok status" in {
-      val service = application.injector.instanceOf[CADXSubmissionService]
+      val service = app.injector.instanceOf[CADXSubmissionService]
 
       when(mockCADXConnector.createFI(any[CreateFIDetailsRequest]())(any[HeaderCarrier](), any[ExecutionContext]()))
         .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))

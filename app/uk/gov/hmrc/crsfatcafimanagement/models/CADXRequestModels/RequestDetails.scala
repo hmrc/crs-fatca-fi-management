@@ -16,23 +16,21 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 
-import play.api.libs.json.JsonConfiguration.Aux
-import play.api.libs.json.{Json, JsonConfiguration, JsonNaming, OFormat}
-import uk.gov.hmrc.crsfatcafimanagement.models.{AddressDetails, ContactDetails, TINDetails}
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.crsfatcafimanagement.models.{AddressDetails, ContactDetails, FIDetail, TINDetails}
 
 final case class RequestDetails(
-  fIID: String,
-  fIName: String,
-  subscriptionID: String,
-  tinDetails: List[TINDetails],
-  isFIUser: Boolean,
-  isFATCAReporting: Boolean,
-  addressDetails: AddressDetails,
-  primaryContactDetails: ContactDetails,
-  secondaryContactDetails: ContactDetails
+  FIID: String,
+  FIName: String,
+  SubscriptionID: String,
+  TINDetails: List[TINDetails],
+  IsFIUser: Boolean,
+  IsFATCAReporting: Boolean,
+  AddressDetails: AddressDetails,
+  PrimaryContactDetails: ContactDetails,
+  SecondaryContactDetails: ContactDetails
 )
 
 object RequestDetails {
-  implicit val jsonConfig: Aux[Json.MacroOptions] = JsonConfiguration(naming = JsonNaming.PascalCase)
-  implicit val format: OFormat[RequestDetails]    = Json.format[RequestDetails]
+  implicit val format: OFormat[RequestDetails] = Json.format[RequestDetails]
 }
