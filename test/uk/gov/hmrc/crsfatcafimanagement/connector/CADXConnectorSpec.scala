@@ -23,6 +23,8 @@ import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.http.Status.OK
+import play.api.test.Helpers.{defaultAwaitTimeout, status}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
@@ -34,7 +36,8 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
   override lazy val app: Application = applicationBuilder()
     .configure(
       conf = "microservice.services.submission.port" -> server.port(),
-      "auditing.enabled" -> "false"
+      "microservice.services.submission.bearer-token" -> "local-token",
+      "auditing.enabled"                              -> "false"
     )
     .build()
 

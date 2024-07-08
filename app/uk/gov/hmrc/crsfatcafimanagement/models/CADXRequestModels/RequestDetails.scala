@@ -17,7 +17,7 @@
 package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.crsfatcafimanagement.models.{AddressDetails, ContactDetails, FIDetail, TINDetails}
+import uk.gov.hmrc.crsfatcafimanagement.models.{AddressDetails, ContactDetails, TINDetails}
 
 final case class RequestDetails(
   FIID: String,
