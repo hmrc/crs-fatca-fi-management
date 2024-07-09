@@ -151,8 +151,8 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return OK when connector returns FIs" in {
         forAll(arbitrary[ViewFIDetailsResponse], arbitrary[FIDetail]) {
           (response, fiDetail) =>
-            val subscriptionId  = fiDetail.subscriptionID
-            val stubbedResponse = response.modify(_.viewFIDetails.responseDetails.fIDetails).setTo(List(fiDetail))
+            val subscriptionId  = fiDetail.SubscriptionID
+            val stubbedResponse = response.modify(_.ViewFIDetails.ResponseDetails.FIDetails).setTo(List(fiDetail))
 
             when(
               mockCADXConnector
@@ -170,7 +170,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must handle UNPROCESSABLE_ENTITY error response returned by the connector" in {
         forAll(arbitrary[ErrorDetails], arbitrary[FIDetail]) {
           (errorResponse, fiDetail) =>
-            val subscriptionId = fiDetail.subscriptionID
+            val subscriptionId = fiDetail.SubscriptionID
 
             when(
               mockCADXConnector
@@ -207,9 +207,9 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return OK when connector returns requested FI" in {
         forAll(arbitrary[ViewFIDetailsResponse], arbitrary[FIDetail]) {
           (response, fiDetail) =>
-            val subscriptionId  = fiDetail.subscriptionID
-            val fiId            = fiDetail.fIID
-            val stubbedResponse = response.modify(_.viewFIDetails.responseDetails.fIDetails).setTo(List(fiDetail))
+            val subscriptionId  = fiDetail.SubscriptionID
+            val fiId            = fiDetail.FIID
+            val stubbedResponse = response.modify(_.ViewFIDetails.ResponseDetails.FIDetails).setTo(List(fiDetail))
             when(
               mockCADXConnector
                 .viewFinancialInstitution(mockitoEq(subscriptionId), mockitoEq(fiId))(any[HeaderCarrier](), any[ExecutionContext]())
@@ -225,8 +225,8 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must handle UNPROCESSABLE_ENTITY error response returned by the connector" in {
         forAll(arbitrary[ErrorDetails], arbitrary[FIDetail]) {
           (errorResponse, fiDetail) =>
-            val subscriptionId = fiDetail.subscriptionID
-            val fiId           = fiDetail.fIID
+            val subscriptionId = fiDetail.SubscriptionID
+            val fiId           = fiDetail.FIID
 
             when(
               mockCADXConnector
@@ -246,8 +246,8 @@ class FIManagementControllerSpec extends SpecBase with Generators {
           s"must return $errorStatusCode when connector returns $errorStatusCode" in {
             forAll(arbitrary[FIDetail]) {
               fiDetail =>
-                val subscriptionId = fiDetail.subscriptionID
-                val fiId           = fiDetail.fIID
+                val subscriptionId = fiDetail.SubscriptionID
+                val fiId           = fiDetail.FIID
 
                 when(
                   mockCADXConnector

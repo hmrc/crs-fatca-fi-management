@@ -23,13 +23,12 @@ import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.http.Status.OK
-import play.api.test.Helpers.{defaultAwaitTimeout, status}
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.CreateFIDetailsRequest
 import uk.gov.hmrc.crsfatcafimanagement.{SpecBase, WireMockServerHandler}
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generators with ScalaCheckPropertyChecks {
 

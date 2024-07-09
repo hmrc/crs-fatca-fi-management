@@ -16,19 +16,17 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 
-import play.api.libs.json.JsonConfiguration.Aux
-import play.api.libs.json.{Json, JsonConfiguration, JsonNaming, OFormat}
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.crsfatcafimanagement.models.RequestType
 
 final case class RequestCommon(
-  originatingSystem: String,
-  transmittingSystem: String,
-  requestType: RequestType,
-  regime: String,
-  requestParameters: List[RequestParameter]
+  OriginatingSystem: String,
+  TransmittingSystem: String,
+  RequestType: RequestType,
+  Regime: String,
+  RequestParameters: List[RequestParameter]
 )
 
 object RequestCommon {
-  implicit val jsonConfig: Aux[Json.MacroOptions] = JsonConfiguration(naming = JsonNaming.PascalCase)
-  implicit val format: OFormat[RequestCommon]     = Json.format[RequestCommon]
+  implicit val format: OFormat[RequestCommon] = Json.format[RequestCommon]
 }

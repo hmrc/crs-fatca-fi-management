@@ -16,12 +16,10 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models.common
 
-import play.api.libs.json.JsonConfiguration.Aux
-import play.api.libs.json.{Json, JsonConfiguration, JsonNaming, OFormat}
+import play.api.libs.json.{Json, OFormat}
 
-final case class ResponseParameter(paramName: String, paramValue: String)
+final case class ResponseParameter(ParamName: String, ParamValue: String)
 
 object ResponseParameter {
-  implicit val jsonConfig: Aux[Json.MacroOptions] = JsonConfiguration(naming = JsonNaming.PascalCase)
   implicit val format: OFormat[ResponseParameter] = Json.format[ResponseParameter]
 }

@@ -75,15 +75,15 @@ trait ModelGenerators {
       primaryContactDetails   <- arbitrary[ContactDetails]
       secondaryContactDetails <- arbitrary[ContactDetails]
     } yield FIDetail(
-      fIID = fiId,
-      fIName = fiName,
-      subscriptionID = subscriptionId,
-      tINDetails = tinDetails,
-      isFIUser = isFIUser,
-      isFATCAReporting = isFATCAReporting,
-      addressDetails = addressDetails,
-      primaryContactDetails = primaryContactDetails,
-      secondaryContactDetails = secondaryContactDetails
+      FIID = fiId,
+      FIName = fiName,
+      SubscriptionID = subscriptionId,
+      TINDetails = tinDetails,
+      IsFIUser = isFIUser,
+      IsFATCAReporting = isFATCAReporting,
+      AddressDetails = addressDetails,
+      PrimaryContactDetails = primaryContactDetails,
+      SecondaryContactDetails = secondaryContactDetails
     )
   }
 

@@ -107,7 +107,7 @@ class FIManagementController @Inject() (
     val error = Try(Json.parse(body).validate[ErrorDetails])
     error match {
       case Success(JsSuccess(value, _)) =>
-        logger.warn(s"CADX error: ${value.errorDetail.sourceFaultDetail.map(_.detail.mkString)}")
+        logger.warn(s"CADX error: ${value.ErrorDetail.SourceFaultDetail.map(_.Detail.mkString)}")
       case _ =>
         logger.warn("CADX response is not a valid json")
     }

@@ -16,22 +16,20 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models
 
-import play.api.libs.json.JsonConfiguration.Aux
-import play.api.libs.json.{Json, JsonConfiguration, JsonNaming, OFormat}
+import play.api.libs.json.{Json, OFormat}
 
 final case class FIDetail(
-  fIID: String,
-  fIName: String,
-  subscriptionID: String,
-  tINDetails: TINDetails,
-  isFIUser: Boolean,
-  isFATCAReporting: Boolean,
-  addressDetails: AddressDetails,
-  primaryContactDetails: ContactDetails,
-  secondaryContactDetails: ContactDetails
+  FIID: String,
+  FIName: String,
+  SubscriptionID: String,
+  TINDetails: TINDetails,
+  IsFIUser: Boolean,
+  IsFATCAReporting: Boolean,
+  AddressDetails: AddressDetails,
+  PrimaryContactDetails: ContactDetails,
+  SecondaryContactDetails: ContactDetails
 )
 
 object FIDetail {
-  implicit val jsonConfig: Aux[Json.MacroOptions] = JsonConfiguration(naming = JsonNaming.PascalCase)
-  implicit val format: OFormat[FIDetail]          = Json.format[FIDetail]
+  implicit val format: OFormat[FIDetail] = Json.format[FIDetail]
 }
