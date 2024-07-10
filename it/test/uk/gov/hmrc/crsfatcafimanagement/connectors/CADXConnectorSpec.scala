@@ -20,6 +20,7 @@ import com.github.tomakehurst.wiremock.http.RequestMethod
 import com.softwaremill.quicklens._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.concurrent.IntegrationPatience
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.{Application, Configuration}
@@ -30,7 +31,7 @@ import uk.gov.hmrc.crsfatcafimanagement.wiremock.WireMockHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatience with WireMockHelper {
+class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatience with WireMockHelper with ScalaCheckPropertyChecks {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -64,8 +65,8 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
 
         forAll(arbitrary[ViewFIDetailsResponse], arbitrary[FIDetail]) {
           (response, fiDetail) =>
-            val subscriptionId  = fiDetail.subscriptionID
-            val stubbedResponse = response.modify(_.viewFIDetails.responseDetails.fIDetails).setTo(List(fiDetail))
+            val subscriptionId  = fiDetail.SubscriptionID
+            val stubbedResponse = response.modify(_.ViewFIDetails.ResponseDetails.FIDetails).setTo(List(fiDetail))
 
             stubResponse(
               url = s"/ASMService/v1/VIEW/$subscriptionId",
@@ -87,7 +88,7 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
 
             forAll(arbitrary[FIDetail]) {
               fiDetail =>
-                val subscriptionId = fiDetail.subscriptionID
+                val subscriptionId = fiDetail.SubscriptionID
 
                 stubResponse(
                   url = s"/ASMService/v1/VIEW/$subscriptionId",
@@ -108,9 +109,9 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
 
         forAll(arbitrary[ViewFIDetailsResponse], arbitrary[FIDetail]) {
           (response, fiDetail) =>
-            val subscriptionId  = fiDetail.subscriptionID
-            val fiId            = fiDetail.fIID
-            val stubbedResponse = response.modify(_.viewFIDetails.responseDetails.fIDetails).setTo(List(fiDetail))
+            val subscriptionId  = fiDetail.SubscriptionID
+            val fiId            = fiDetail.FIID
+            val stubbedResponse = response.modify(_.ViewFIDetails.ResponseDetails.FIDetails).setTo(List(fiDetail))
 
             stubResponse(
               url = s"/ASMService/v1/VIEW/$subscriptionId/$fiId",
@@ -132,8 +133,8 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
 
             forAll(arbitrary[FIDetail]) {
               fiDetail =>
-                val subscriptionId = fiDetail.subscriptionID
-                val fiId           = fiDetail.fIID
+                val subscriptionId = fiDetail.SubscriptionID
+                val fiId           = fiDetail.FIID
 
                 stubResponse(
                   url = s"/ASMService/v1/VIEW/$subscriptionId/$fiId",

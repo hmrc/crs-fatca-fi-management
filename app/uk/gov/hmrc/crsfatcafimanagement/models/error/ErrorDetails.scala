@@ -16,12 +16,10 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models.error
 
-import play.api.libs.json.JsonConfiguration.Aux
-import play.api.libs.json.{Json, JsonConfiguration, JsonNaming, OFormat}
+import play.api.libs.json.{Json, OFormat}
 
-final case class ErrorDetails(errorDetail: ErrorDetail)
+final case class ErrorDetails(ErrorDetail: ErrorDetail)
 
 object ErrorDetails {
-  implicit val jsonConfig: Aux[Json.MacroOptions] = JsonConfiguration(naming = JsonNaming.PascalCase)
-  implicit val format: OFormat[ErrorDetails]      = Json.format[ErrorDetails]
+  implicit val format: OFormat[ErrorDetails] = Json.format[ErrorDetails]
 }

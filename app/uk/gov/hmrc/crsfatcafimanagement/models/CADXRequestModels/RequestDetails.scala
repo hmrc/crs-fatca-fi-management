@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.crsfatcafimanagement.models
+package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.crsfatcafimanagement.models.{AddressDetails, ContactDetails, TINDetails}
 
-final case class TINDetails(TINType: TINType, TIN: String, IssuedBy: String)
+final case class RequestDetails(
+  FIID: String,
+  FIName: String,
+  SubscriptionID: String,
+  TINDetails: List[TINDetails],
+  IsFIUser: Boolean,
+  IsFATCAReporting: Boolean,
+  AddressDetails: AddressDetails,
+  PrimaryContactDetails: ContactDetails,
+  SecondaryContactDetails: ContactDetails
+)
 
-object TINDetails {
-  implicit val format: OFormat[TINDetails] = Json.format[TINDetails]
+object RequestDetails {
+  implicit val format: OFormat[RequestDetails] = Json.format[RequestDetails]
 }

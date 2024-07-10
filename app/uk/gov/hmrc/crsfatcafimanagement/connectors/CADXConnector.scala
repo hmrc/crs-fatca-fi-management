@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.connectors
 
+import play.api.libs.json.Json
 import uk.gov.hmrc.crsfatcafimanagement.config.AppConfig
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.CreateFIDetailsRequest
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HeaderNames, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HeaderNames, HttpReads, HttpResponse, StringContextOps}
 
 import java.net.URL
 import java.time.ZonedDateTime
@@ -34,6 +36,16 @@ class CADXConnector @Inject() (
 
   implicit val httpReads: HttpReads[HttpResponse] =
     (_: String, _: String, response: HttpResponse) => response
+
+  def createFI(submissionDetails: CreateFIDetailsRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+    val serviceName = "submission"
+
+    http
+      .post(url"${config.baseUrl(serviceName)}")
+      .withBody(Json.toJson(submissionDetails))
+      .setHeader(extraHeaders(config, serviceName): _*)
+      .execute[HttpResponse]
+  }
 
   def listFinancialInstitutions(subscriptionId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
     makeGetRequest(subscriptionId)
