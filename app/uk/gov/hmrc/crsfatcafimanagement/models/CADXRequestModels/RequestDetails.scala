@@ -20,15 +20,14 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.crsfatcafimanagement.models.{AddressDetails, ContactDetails, TINDetails}
 
 final case class RequestDetails(
-  FIID: String,
   FIName: String,
   SubscriptionID: String,
   TINDetails: List[TINDetails],
   IsFIUser: Boolean,
   IsFATCAReporting: Boolean,
   AddressDetails: AddressDetails,
-  PrimaryContactDetails: ContactDetails,
-  SecondaryContactDetails: ContactDetails
+  PrimaryContactDetails: Option[ContactDetails],
+  SecondaryContactDetails: Option[ContactDetails]
 )
 
 object RequestDetails {

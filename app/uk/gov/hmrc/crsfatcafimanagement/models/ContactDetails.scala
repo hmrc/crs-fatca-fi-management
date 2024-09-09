@@ -18,7 +18,7 @@ package uk.gov.hmrc.crsfatcafimanagement.models
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class ContactDetails(ContactName: String, EmailAddress: String, PhoneNumber: String)
+final case class ContactDetails(ContactName: String, EmailAddress: String, PhoneNumber: Option[String])
 
 object ContactDetails {
   implicit val format: OFormat[ContactDetails] = Json.format[ContactDetails]
