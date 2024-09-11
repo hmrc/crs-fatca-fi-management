@@ -23,7 +23,7 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.crsfatcafimanagement.auth.AuthActionSets
 import uk.gov.hmrc.crsfatcafimanagement.config.AppConfig
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.CreateFIDetailsRequest
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.RequestDetails
 import uk.gov.hmrc.crsfatcafimanagement.models.error.ErrorDetails
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
 import uk.gov.hmrc.crsfatcafimanagement.services.CADXSubmissionService
@@ -46,7 +46,7 @@ class FIManagementController @Inject() (
   def createsFinancialInstitutions(): Action[JsValue] = authenticator.authenticateAll.async(parse.json) {
     implicit request =>
       request.body
-        .validate[CreateFIDetailsRequest]
+        .validate[RequestDetails]
         .fold(
           invalid =>
             Future.successful {

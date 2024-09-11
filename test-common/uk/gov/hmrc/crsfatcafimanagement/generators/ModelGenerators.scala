@@ -51,7 +51,7 @@ trait ModelGenerators {
         contactName  <- stringOfLength(105)
         emailAddress <- validPhoneNumber
         phoneNumber  <- stringOfLength(24)
-      } yield ContactDetails(contactName, emailAddress, phoneNumber)
+      } yield ContactDetails(contactName, emailAddress, Some(phoneNumber))
     }
 
   implicit val arbitraryTINDetails: Arbitrary[TINDetails] =
@@ -165,7 +165,6 @@ trait ModelGenerators {
 
   implicit val arbitraryRequestDetails: Arbitrary[RequestDetails] = Arbitrary {
     for {
-      fiId                    <- stringOfLength(15)
       fiName                  <- stringOfLength(105)
       subscriptionId          <- validSubscriptionID
       tinDetails              <- arbitrary[TINDetails]
@@ -175,15 +174,14 @@ trait ModelGenerators {
       primaryContactDetails   <- arbitrary[ContactDetails]
       secondaryContactDetails <- arbitrary[ContactDetails]
     } yield RequestDetails(
-      FIID = fiId,
       FIName = fiName,
       SubscriptionID = subscriptionId,
       TINDetails = List(tinDetails),
       IsFIUser = isFIUser,
       IsFATCAReporting = isFATCAReporting,
       AddressDetails = addressDetails,
-      PrimaryContactDetails = primaryContactDetails,
-      SecondaryContactDetails = secondaryContactDetails
+      PrimaryContactDetails = Some(primaryContactDetails),
+      SecondaryContactDetails = Some(secondaryContactDetails)
     )
   }
 

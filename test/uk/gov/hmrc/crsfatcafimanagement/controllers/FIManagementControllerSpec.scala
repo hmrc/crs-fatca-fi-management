@@ -30,7 +30,7 @@ import uk.gov.hmrc.crsfatcafimanagement.SpecBase
 import uk.gov.hmrc.crsfatcafimanagement.auth.{AllowAllAuthAction, FakeAllowAllAuthAction}
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.CreateFIDetailsRequest
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateFIDetailsRequest, RequestDetails}
 import uk.gov.hmrc.crsfatcafimanagement.models.error.ErrorDetails
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
 import uk.gov.hmrc.crsfatcafimanagement.models.{FIDetail, ViewFIDetailsResponse}
@@ -66,55 +66,35 @@ class FIManagementControllerSpec extends SpecBase with Generators {
   val fiDetailsRequestJson: JsValue = Json.parse(
     """
       |{
-      |  "FIManagementType": {
-      |    "RequestCommon": {
-      |      "TransmittingSystem": "192.168.1.1",
-      |      "OriginatingSystem": "192.168.1.2",
-      |      "RequestType": "CREATE",
-      |      "Regime": "CRSFATCA",
-      |      "RequestParameters": [
-      |        {
-      |          "ParamName": "ExampleParam1",
-      |          "ParamValue": "Value1"
-      |        },
-      |        {
-      |          "ParamName": "ExampleParam2",
-      |          "ParamValue": "Value2"
-      |        }
-      |      ]
-      |    },
-      |    "RequestDetails": {
-      |      "SubscriptionID": "123456789012345",
-      |      "FIID": "FI1234567890123",
-      |      "FIName": "Financial Institution",
-      |      "TINDetails": [
-      |        {
-      |          "TIN": "TIN123456789",
-      |          "TINType": "GIIN",
-      |          "IssuedBy": "US"
-      |        }
-      |      ],
-      |      "IsFIUser": false,
-      |      "IsFATCAReporting": true,
-      |      "PrimaryContactDetails": {
-      |        "PhoneNumber": "07123456789",
-      |        "ContactName": "John Doe",
-      |        "EmailAddress": "john.doe@example.com"
-      |      },
-      |      "SecondaryContactDetails": {
-      |        "PhoneNumber": "07876543210",
-      |        "ContactName": "Jane Doe",
-      |        "EmailAddress": "jane.doe@example.com"
-      |      },
-      |      "AddressDetails": {
-      |        "AddressLine1": "100 Sutton Street",
-      |        "AddressLine2": "Wokingham",
-      |        "AddressLine3": "Surrey",
-      |        "AddressLine4": "London",
-      |        "PostalCode": "DH14EJ",
-      |        "CountryCode": "GB"
-      |      }
+      |  "SubscriptionID": "123456789012345",
+      |  "FIID": "FI1234567890123",
+      |  "FIName": "Financial Institution",
+      |  "TINDetails": [
+      |    {
+      |      "TIN": "TIN123456789",
+      |      "TINType": "GIIN",
+      |      "IssuedBy": "US"
       |    }
+      |  ],
+      |  "IsFIUser": false,
+      |  "IsFATCAReporting": true,
+      |  "PrimaryContactDetails": {
+      |    "PhoneNumber": "07123456789",
+      |    "ContactName": "John Doe",
+      |    "EmailAddress": "john.doe@example.com"
+      |  },
+      |  "SecondaryContactDetails": {
+      |    "PhoneNumber": "07876543210",
+      |    "ContactName": "Jane Doe",
+      |    "EmailAddress": "jane.doe@example.com"
+      |  },
+      |  "AddressDetails": {
+      |    "AddressLine1": "100 Sutton Street",
+      |    "AddressLine2": "Wokingham",
+      |    "AddressLine3": "Surrey",
+      |    "AddressLine4": "London",
+      |    "PostalCode": "DH14EJ",
+      |    "CountryCode": "GB"
       |  }
       |}""".stripMargin
   )
@@ -122,26 +102,6 @@ class FIManagementControllerSpec extends SpecBase with Generators {
   val invalidFiDetailsRequestJson: JsValue = Json.parse(
     """
       |{
-      |  "FIManagementType": {
-      |    "RequestCommon": {
-      |      "TransmittingSystem": "192.168.1.1",
-      |      "OriginatingSystem": "192.168.1.2",
-      |      "RequestType": "CREATE",
-      |      "Regime": "CRSFATCA",
-      |      "RequestParameters": [
-      |        {
-      |          "ParamName": "ExampleParam1",
-      |          "ParamValue": "Value1"
-      |        },
-      |        {
-      |          "ParamName": "ExampleParam2",
-      |          "ParamValue": "Value2"
-      |        }
-      |      ]
-      |    },
-      |    "RequestDetails": {
-      |    }
-      |  }
       |}""".stripMargin
   )
 
@@ -267,7 +227,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return OK when UpdateSubscription was successful" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[CreateFIDetailsRequest]())(
+            .createFI(any[RequestDetails]())(
               any[HeaderCarrier](),
               any[ExecutionContext]()
             )
@@ -291,7 +251,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return 500 with a json validation error when receiving invalid json" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[CreateFIDetailsRequest]())(
+            .createFI(any[RequestDetails]())(
               any[HeaderCarrier](),
               any[ExecutionContext]()
             )
@@ -315,7 +275,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return a create submission error when not able to create FI" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[CreateFIDetailsRequest]())(
+            .createFI(any[RequestDetails]())(
               any[HeaderCarrier](),
               any[ExecutionContext]()
             )
