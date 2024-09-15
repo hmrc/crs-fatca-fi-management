@@ -30,7 +30,7 @@ import uk.gov.hmrc.crsfatcafimanagement.SpecBase
 import uk.gov.hmrc.crsfatcafimanagement.auth.{AllowAllAuthAction, FakeAllowAllAuthAction}
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateFIDetailsRequest, RequestDetails}
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateRequestDetails, RemoveRequestDetails}
 import uk.gov.hmrc.crsfatcafimanagement.models.error.ErrorDetails
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
 import uk.gov.hmrc.crsfatcafimanagement.models.{FIDetail, ViewFIDetailsResponse}
@@ -227,7 +227,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return OK when UpdateSubscription was successful" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[RequestDetails]())(
+            .createFI(any[CreateRequestDetails]())(
               any[HeaderCarrier](),
               any[ExecutionContext]()
             )
@@ -251,7 +251,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return 500 with a json validation error when receiving invalid json" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[RequestDetails]())(
+            .createFI(any[CreateRequestDetails]())(
               any[HeaderCarrier](),
               any[ExecutionContext]()
             )
@@ -275,7 +275,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return a create submission error when not able to create FI" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[RequestDetails]())(
+            .createFI(any[CreateRequestDetails]())(
               any[HeaderCarrier](),
               any[ExecutionContext]()
             )
@@ -290,6 +290,42 @@ class FIManagementControllerSpec extends SpecBase with Generators {
             POST,
             routes.FIManagementController.createsFinancialInstitutions.url
           ).withJsonBody(fiDetailsRequestJson)
+
+        val result = route(app, request).value
+        status(result) mustEqual INTERNAL_SERVER_ERROR
+
+      }
+    }
+
+    "removeFinancialInstitution" - {
+      val removeFiDetailsRequestJson: JsValue = Json.parse(
+        """
+          |{
+          |  "SubscriptionID": "123456789012345",
+          |  "FIID": "FI1234567890123",
+          |  "FIName": "Financial Institution"
+          |}""".stripMargin
+      )
+      when(mockCADXSubmissionService.removeFI(any[RemoveRequestDetails]())(any[HeaderCarrier](), any[ExecutionContext]()))
+        .thenReturn(Future.successful(Right(())))
+
+      "must return OK when removal request was successful" in {
+        val request =
+          FakeRequest(
+            POST,
+            routes.FIManagementController.removeFinancialInstitution.url
+          ).withJsonBody(removeFiDetailsRequestJson)
+
+        val result = route(app, request).value
+        status(result) mustEqual OK
+      }
+
+      "must return 500 with a json validation error when receiving invalid json" in {
+        val request =
+          FakeRequest(
+            POST,
+            routes.FIManagementController.removeFinancialInstitution.url
+          ).withJsonBody(invalidFiDetailsRequestJson)
 
         val result = route(app, request).value
         status(result) mustEqual INTERNAL_SERVER_ERROR

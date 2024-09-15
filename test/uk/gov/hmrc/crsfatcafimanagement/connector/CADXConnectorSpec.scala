@@ -25,7 +25,7 @@ import play.api.Application
 import play.api.http.Status.OK
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.CreateFIDetailsRequest
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateFIDetailsRequest, RemoveFIDetailsRequest}
 import uk.gov.hmrc.crsfatcafimanagement.{SpecBase, WireMockServerHandler}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -71,6 +71,34 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
             )
 
             val result = connector.createFI(sub)
+            result.futureValue.status mustBe errorCode
+        }
+      }
+    }
+    "remove FI" - {
+      "must return status as OK for removal request" in {
+        stubResponse(
+          "/ASMService/v1/FIManagement",
+          OK
+        )
+
+        forAll(arbitrary[RemoveFIDetailsRequest]) {
+          req =>
+            val result = connector.removeFI(req)
+            result.futureValue.status mustBe OK
+        }
+      }
+
+      "must return an error status for failed remove request" in {
+
+        forAll(arbitrary[CreateFIDetailsRequest], errorCodes) {
+          (req, errorCode) =>
+            stubResponse(
+              "/ASMService/v1/FIManagement",
+              errorCode
+            )
+
+            val result = connector.createFI(req)
             result.futureValue.status mustBe errorCode
         }
       }

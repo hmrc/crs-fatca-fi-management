@@ -20,9 +20,9 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen.listOf
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels._
+import uk.gov.hmrc.crsfatcafimanagement.models._
 import uk.gov.hmrc.crsfatcafimanagement.models.common.{ResponseCommon, ResponseDetails, ResponseParameter}
 import uk.gov.hmrc.crsfatcafimanagement.models.error.{ErrorDetail, ErrorDetails, SourceFaultDetail}
-import uk.gov.hmrc.crsfatcafimanagement.models._
 
 trait ModelGenerators {
   self: Generators =>
@@ -135,8 +135,15 @@ trait ModelGenerators {
   implicit val arbitraryCreateFIDetails: Arbitrary[CreateFIDetails] = Arbitrary {
     for {
       requestCommon  <- arbitrary[RequestCommon]
-      requestDetails <- arbitrary[RequestDetails]
+      requestDetails <- arbitrary[CreateRequestDetails]
     } yield CreateFIDetails(requestCommon, requestDetails)
+  }
+
+  implicit val arbitraryRemoveFIDetailsRequest: Arbitrary[RemoveFIDetailsRequest] = Arbitrary {
+    for {
+      requestCommon  <- arbitrary[RequestCommon]
+      requestDetails <- arbitrary[RemoveRequestDetails]
+    } yield RemoveFIDetailsRequest(requestCommon, requestDetails)
   }
 
   implicit val arbitraryRequestCommon: Arbitrary[RequestCommon] = Arbitrary {
@@ -163,7 +170,7 @@ trait ModelGenerators {
       } yield RequestParameter(parameterName, parameterValue)
     }
 
-  implicit val arbitraryRequestDetails: Arbitrary[RequestDetails] = Arbitrary {
+  implicit val arbitraryRequestDetails: Arbitrary[CreateRequestDetails] = Arbitrary {
     for {
       fiName                  <- stringOfLength(105)
       subscriptionId          <- validSubscriptionID
@@ -173,7 +180,7 @@ trait ModelGenerators {
       addressDetails          <- arbitrary[AddressDetails]
       primaryContactDetails   <- arbitrary[ContactDetails]
       secondaryContactDetails <- arbitrary[ContactDetails]
-    } yield RequestDetails(
+    } yield CreateRequestDetails(
       FIName = fiName,
       SubscriptionID = subscriptionId,
       TINDetails = List(tinDetails),
@@ -183,6 +190,13 @@ trait ModelGenerators {
       PrimaryContactDetails = Some(primaryContactDetails),
       SecondaryContactDetails = Some(secondaryContactDetails)
     )
+  }
+
+  implicit val arbitraryRemoveRequestDetails: Arbitrary[RemoveRequestDetails] = Arbitrary {
+    for {
+      subscriptionId <- validSubscriptionID
+      fiid           <- validSubscriptionID
+    } yield RemoveRequestDetails(subscriptionId, fiid)
   }
 
   implicit val arbitrarySourceFaultDetail: Arbitrary[SourceFaultDetail] =

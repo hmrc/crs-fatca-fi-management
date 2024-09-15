@@ -18,7 +18,7 @@ package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class CreateFIDetailsRequest(FIManagementType: CreateFIDetails)
+final case class CreateFIDetailsRequest(FIManagementType: CreateFIDetails) //todo: is this needed? looks at CreateFIDetails class
 
 object CreateFIDetailsRequest {
   implicit val format: OFormat[CreateFIDetailsRequest] = Json.format[CreateFIDetailsRequest]

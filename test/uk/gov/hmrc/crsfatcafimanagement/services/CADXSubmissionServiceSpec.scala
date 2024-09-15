@@ -16,21 +16,19 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.services
 
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.{any, eq => is}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.Status._
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.crsfatcafimanagement.SpecBase
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateFIDetails, CreateFIDetailsRequest, RequestCommon, RequestDetails}
-import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.CREATE
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels._
+import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.{CREATE, DELETE}
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
@@ -45,86 +43,138 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
     )
     .build()
 
-  val fiDetailsRequestJson: JsValue = Json.parse(
-    """
-      |{
-      |  "SubscriptionID": "123456789012345",
-      |  "FIID": "FI1234567890123",
-      |  "FIName": "Financial Institution",
-      |  "TINDetails": [
-      |    {
-      |      "TIN": "TIN123456789",
-      |      "TINType": "GIIN",
-      |      "IssuedBy": "US"
-      |    }
-      |  ],
-      |  "IsFIUser": false,
-      |  "IsFATCAReporting": true,
-      |  "PrimaryContactDetails": {
-      |    "PhoneNumber": "07123456789",
-      |    "ContactName": "John Doe",
-      |    "EmailAddress": "john.doe@example.com"
-      |  },
-      |  "SecondaryContactDetails": {
-      |    "PhoneNumber": "07876543210",
-      |    "ContactName": "Jane Doe",
-      |    "EmailAddress": "jane.doe@example.com"
-      |  },
-      |  "AddressDetails": {
-      |    "AddressLine1": "100 Sutton Street",
-      |    "AddressLine2": "Wokingham",
-      |    "AddressLine3": "Surrey",
-      |    "AddressLine4": "London",
-      |    "PostalCode": "DH14EJ",
-      |    "CountryCode": "GB"
-      |  }
-      |}""".stripMargin
-  )
-
-  val createRequestDetails: RequestDetails = fiDetailsRequestJson.as[RequestDetails]
-
-  val createFiDetailsRequest = CreateFIDetailsRequest(
-    FIManagementType = CreateFIDetails(
-      RequestCommon = RequestCommon(
-        OriginatingSystem = "crs-fatca-fi-management",
-        TransmittingSystem = "crs-fatca-fi-management",
-        RequestType = CREATE,
-        Regime = "CRSFATCA",
-        RequestParameters = List.empty
-      ),
-      RequestDetails = createRequestDetails
-    )
-  )
-
   "SubmissionService" - {
-    "must  return UpdateSubscription with OK status when connector response with ok status" in {
-      val service = app.injector.instanceOf[CADXSubmissionService]
+    "createFI" - {
+      val fiDetailsRequestJson: JsValue = Json.parse(
+        """
+          |{
+          |  "SubscriptionID": "123456789012345",
+          |  "FIID": "FI1234567890123",
+          |  "FIName": "Financial Institution",
+          |  "TINDetails": [
+          |    {
+          |      "TIN": "TIN123456789",
+          |      "TINType": "GIIN",
+          |      "IssuedBy": "US"
+          |    }
+          |  ],
+          |  "IsFIUser": false,
+          |  "IsFATCAReporting": true,
+          |  "PrimaryContactDetails": {
+          |    "PhoneNumber": "07123456789",
+          |    "ContactName": "John Doe",
+          |    "EmailAddress": "john.doe@example.com"
+          |  },
+          |  "SecondaryContactDetails": {
+          |    "PhoneNumber": "07876543210",
+          |    "ContactName": "Jane Doe",
+          |    "EmailAddress": "jane.doe@example.com"
+          |  },
+          |  "AddressDetails": {
+          |    "AddressLine1": "100 Sutton Street",
+          |    "AddressLine2": "Wokingham",
+          |    "AddressLine3": "Surrey",
+          |    "AddressLine4": "London",
+          |    "PostalCode": "DH14EJ",
+          |    "CountryCode": "GB"
+          |  }
+          |}""".stripMargin
+      )
+      val createRequestDetails: CreateRequestDetails = fiDetailsRequestJson.as[CreateRequestDetails]
+      val createFiDetailsRequest: CreateFIDetailsRequest = CreateFIDetailsRequest(
+        FIManagementType = CreateFIDetails(
+          RequestCommon = RequestCommon(
+            OriginatingSystem = "crs-fatca-fi-management",
+            TransmittingSystem = "crs-fatca-fi-management",
+            RequestType = CREATE,
+            Regime = "CRSFATCA",
+            RequestParameters = List.empty
+          ),
+          RequestDetails = createRequestDetails
+        )
+      )
 
-      when(mockCADXConnector.createFI(is(createFiDetailsRequest))(any[HeaderCarrier](), any[ExecutionContext]()))
-        .thenReturn(Future.successful(HttpResponse(OK, "Good Response")))
+      "must  return UpdateSubscription with OK status when connector response with ok status" in {
+        val service = app.injector.instanceOf[CADXSubmissionService]
 
-      val result = service.createFI(createRequestDetails)
+        when(mockCADXConnector.createFI(is(createFiDetailsRequest))(any[HeaderCarrier](), any[ExecutionContext]()))
+          .thenReturn(Future.successful(HttpResponse(OK, "Good Response")))
 
-      whenReady(result) {
-        sub =>
-          verify(mockCADXConnector, times(1)).createFI(is(createFiDetailsRequest))(any[HeaderCarrier](), any[ExecutionContext]())
-          sub mustBe Right(())
+        val result = service.createFI(createRequestDetails)
+
+        whenReady(result) {
+          sub =>
+            verify(mockCADXConnector, times(1)).createFI(is(createFiDetailsRequest))(any[HeaderCarrier](), any[ExecutionContext]())
+            sub mustBe Right(())
+        }
+      }
+
+      "must have UpdateSubscriptionError when connector response with not ok status" in {
+        val service = app.injector.instanceOf[CADXSubmissionService]
+
+        when(mockCADXConnector.createFI(is(createFiDetailsRequest))(any[HeaderCarrier](), any[ExecutionContext]()))
+          .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
+
+        val result = service.createFI(createRequestDetails)
+
+        whenReady(result) {
+          sub =>
+            verify(mockCADXConnector, times(1)).createFI(is(createFiDetailsRequest))(any[HeaderCarrier](), any[ExecutionContext]())
+            sub mustBe Left(CreateSubmissionError(500))
+        }
       }
     }
+    "removeFI" - {
+      val removeFiDetailsRequestJson: JsValue = Json.parse(
+        """
+          |{
+          |  "SubscriptionID": "123456789012345",
+          |  "FIID": "FI1234567890123",
+          |  "FIName": "Financial Institution"
+          |}""".stripMargin
+      )
+      val removeRequestDetails: RemoveRequestDetails = removeFiDetailsRequestJson.as[RemoveRequestDetails]
+      val removeFiDetailsRequest: RemoveFIDetailsRequest = RemoveFIDetailsRequest(
+        RequestCommon = RequestCommon(
+          OriginatingSystem = "crs-fatca-fi-management",
+          TransmittingSystem = "crs-fatca-fi-management",
+          RequestType = DELETE,
+          Regime = "CRSFATCA",
+          RequestParameters = List.empty
+        ),
+        RequestDetails = removeFiDetailsRequestJson.as[RemoveRequestDetails]
+      )
 
-    "must have UpdateSubscriptionError when connector response with not ok status" in {
-      val service = app.injector.instanceOf[CADXSubmissionService]
+      "must build valid request return and return OK when connector gives OK " in {
+        val service = app.injector.instanceOf[CADXSubmissionService]
 
-      when(mockCADXConnector.createFI(is(createFiDetailsRequest))(any[HeaderCarrier](), any[ExecutionContext]()))
-        .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
+        when(mockCADXConnector.removeFI(is(removeFiDetailsRequest))(any[HeaderCarrier](), any[ExecutionContext]()))
+          .thenReturn(Future.successful(HttpResponse(OK)))
 
-      val result = service.createFI(createRequestDetails)
+        val result = service.removeFI(removeRequestDetails)
 
-      whenReady(result) {
-        sub =>
-          verify(mockCADXConnector, times(1)).createFI(is(createFiDetailsRequest))(any[HeaderCarrier](), any[ExecutionContext]())
-          sub mustBe Left(CreateSubmissionError(500))
+        whenReady(result) {
+          sub =>
+            verify(mockCADXConnector, times(1)).removeFI(is(removeFiDetailsRequest))(any[HeaderCarrier](), any[ExecutionContext]())
+            sub mustBe Right(())
+        }
       }
+
+      "must pass on apiError when connector responds with an error" in {
+        val service = app.injector.instanceOf[CADXSubmissionService]
+
+        when(mockCADXConnector.removeFI(is(removeFiDetailsRequest))(any[HeaderCarrier](), any[ExecutionContext]()))
+          .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR)))
+
+        val result = service.removeFI(removeRequestDetails)
+
+        whenReady(result) {
+          sub =>
+            verify(mockCADXConnector, times(1)).removeFI(is(removeFiDetailsRequest))(any[HeaderCarrier](), any[ExecutionContext]())
+            sub mustBe Left(CreateSubmissionError(500))
+        }
+      }
+
     }
   }
 

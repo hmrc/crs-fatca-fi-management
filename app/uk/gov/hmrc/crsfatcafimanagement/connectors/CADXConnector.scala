@@ -18,7 +18,7 @@ package uk.gov.hmrc.crsfatcafimanagement.connectors
 
 import play.api.libs.json.Json
 import uk.gov.hmrc.crsfatcafimanagement.config.AppConfig
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.CreateFIDetailsRequest
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateFIDetailsRequest, RemoveFIDetailsRequest}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HeaderNames, HttpReads, HttpResponse, StringContextOps}
 
@@ -43,6 +43,16 @@ class CADXConnector @Inject() (
     http
       .post(url"${config.baseUrl(serviceName)}")
       .withBody(Json.toJson(submissionDetails))
+      .setHeader(extraHeaders(config, serviceName): _*)
+      .execute[HttpResponse]
+  }
+
+  def removeFI(removeDetails: RemoveFIDetailsRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+    val serviceName = "submission"
+
+    http
+      .post(url"${config.baseUrl(serviceName)}")
+      .withBody(Json.toJson(removeDetails))
       .setHeader(extraHeaders(config, serviceName): _*)
       .execute[HttpResponse]
   }

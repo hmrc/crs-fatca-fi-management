@@ -19,8 +19,8 @@ package uk.gov.hmrc.crsfatcafimanagement.services
 import play.api.Logging
 import play.api.http.Status.OK
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateFIDetails, CreateFIDetailsRequest, RequestCommon, RequestDetails}
-import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.CREATE
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels._
+import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.{CREATE, DELETE}
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -30,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging {
 
   def createFI(
-    requestDetails: RequestDetails
+    requestDetails: CreateRequestDetails
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[CreateSubmissionError, Unit]] = {
     val req = CreateFIDetailsRequest(
       FIManagementType = CreateFIDetails(
@@ -53,6 +53,30 @@ class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging
             Left(CreateSubmissionError(status))
         }
     }
+  }
+
+  def removeFI(
+    requestDetails: RemoveRequestDetails
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[CreateSubmissionError, Unit]] = {
+    val reqCommon = RequestCommon(
+      OriginatingSystem = "crs-fatca-fi-management",
+      TransmittingSystem = "crs-fatca-fi-management",
+      RequestType = DELETE,
+      Regime = "CRSFATCA",
+      RequestParameters = List.empty
+    )
+    val request = RemoveFIDetailsRequest(reqCommon, requestDetails)
+    connector
+      .removeFI(request)
+      .map {
+        res =>
+          res.status match {
+            case OK => Right(())
+            case status =>
+              logger.warn(s"remove FI triggered status: $status")
+              Left(CreateSubmissionError(status))
+          }
+      }
   }
 
 }
