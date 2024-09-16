@@ -91,14 +91,14 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
 
       "must return an error status for failed remove request" in {
 
-        forAll(arbitrary[CreateFIDetailsRequest], errorCodes) {
+        forAll(arbitrary[RemoveFIDetailsRequest], errorCodes) {
           (req, errorCode) =>
             stubResponse(
               "/ASMService/v1/FIManagement",
               errorCode
             )
 
-            val result = connector.createFI(req)
+            val result = connector.removeFI(req)
             result.futureValue.status mustBe errorCode
         }
       }
