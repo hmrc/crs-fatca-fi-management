@@ -16,10 +16,22 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, Json, OFormat}
 
-final case class CreateFIDetailsRequest(FIManagementType: CreateFIDetails) //todo: is this needed? looks at CreateFIDetails class
+final case class FIManagement[R](FIManagement: R)
+
+object FIManagement {
+  implicit def FIManagementFormat[R: Format]: OFormat[FIManagement[R]] = Json.format[FIManagement[R]]
+}
+
+final case class CreateFIDetailsRequest(RequestCommon: RequestCommon, RequestDetails: CreateRequestDetails)
 
 object CreateFIDetailsRequest {
   implicit val format: OFormat[CreateFIDetailsRequest] = Json.format[CreateFIDetailsRequest]
+}
+
+final case class RemoveFIDetailsRequest(RequestCommon: RequestCommon, RequestDetails: RemoveRequestDetails)
+
+object RemoveFIDetailsRequest {
+  implicit val format: OFormat[RemoveFIDetailsRequest] = Json.format[RemoveFIDetailsRequest]
 }

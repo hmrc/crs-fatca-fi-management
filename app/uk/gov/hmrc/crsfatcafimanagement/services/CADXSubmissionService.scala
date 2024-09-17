@@ -32,19 +32,15 @@ class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging
   def createFI(
     requestDetails: CreateRequestDetails
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[CreateSubmissionError, Unit]] = {
-    val req = CreateFIDetailsRequest(
-      FIManagementType = CreateFIDetails(
-        RequestCommon = RequestCommon(
-          OriginatingSystem = "crs-fatca-fi-management",
-          TransmittingSystem = "crs-fatca-fi-management",
-          RequestType = CREATE,
-          Regime = "CRSFATCA",
-          RequestParameters = List.empty
-        ),
-        RequestDetails = requestDetails
-      )
+    val reqCommon = RequestCommon(
+      OriginatingSystem = "crs-fatca-fi-management",
+      TransmittingSystem = "crs-fatca-fi-management",
+      RequestType = CREATE,
+      Regime = "CRSFATCA",
+      RequestParameters = List.empty
     )
-    connector.createFI(req).map {
+    val request: FIManagement[CreateFIDetailsRequest] = FIManagement(CreateFIDetailsRequest(reqCommon, requestDetails))
+    connector.createFI(request).map {
       res =>
         res.status match {
           case OK => Right(())
@@ -65,7 +61,7 @@ class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging
       Regime = "CRSFATCA",
       RequestParameters = List.empty
     )
-    val request = RemoveFIDetailsRequest(reqCommon, requestDetails)
+    val request: FIManagement[RemoveFIDetailsRequest] = FIManagement(RemoveFIDetailsRequest(reqCommon, requestDetails))
     connector
       .removeFI(request)
       .map {

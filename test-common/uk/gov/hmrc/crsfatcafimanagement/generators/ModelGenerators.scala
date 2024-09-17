@@ -127,16 +127,11 @@ trait ModelGenerators {
       arbitrary[ViewFIDetails].map(ViewFIDetailsResponse.apply)
     }
 
-  implicit val arbitraryViewFIDetailsRequest: Arbitrary[CreateFIDetailsRequest] =
-    Arbitrary {
-      arbitrary[CreateFIDetails].map(CreateFIDetailsRequest.apply)
-    }
-
-  implicit val arbitraryCreateFIDetails: Arbitrary[CreateFIDetails] = Arbitrary {
+  implicit val arbitraryCreateFIDetails: Arbitrary[CreateFIDetailsRequest] = Arbitrary {
     for {
       requestCommon  <- arbitrary[RequestCommon]
       requestDetails <- arbitrary[CreateRequestDetails]
-    } yield CreateFIDetails(requestCommon, requestDetails)
+    } yield CreateFIDetailsRequest(requestCommon, requestDetails)
   }
 
   implicit val arbitraryRemoveFIDetailsRequest: Arbitrary[RemoveFIDetailsRequest] = Arbitrary {
