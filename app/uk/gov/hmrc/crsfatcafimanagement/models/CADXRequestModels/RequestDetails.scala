@@ -19,7 +19,7 @@ package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.crsfatcafimanagement.models.{AddressDetails, ContactDetails, TINDetails}
 
-final case class RequestDetails(
+final case class CreateRequestDetails(
   FIName: String,
   SubscriptionID: String,
   TINDetails: List[TINDetails],
@@ -30,6 +30,22 @@ final case class RequestDetails(
   SecondaryContactDetails: Option[ContactDetails]
 )
 
-object RequestDetails {
-  implicit val format: OFormat[RequestDetails] = Json.format[RequestDetails]
+object CreateRequestDetails {
+  implicit val format: OFormat[CreateRequestDetails] = Json.format[CreateRequestDetails]
+}
+
+final case class RemoveRequestDetails(
+  SubscriptionID: String,
+  FIID: String,
+  FIName: Option[String] = None,
+  TINDetails: Option[List[TINDetails]] = None,
+  IsFIUser: Option[Boolean] = None,
+  IsFATCAReporting: Option[Boolean] = None,
+  PrimaryContactDetails: Option[ContactDetails] = None,
+  SecondaryContactDetails: Option[ContactDetails] = None,
+  AddressDetails: Option[AddressDetails] = None
+)
+
+object RemoveRequestDetails {
+  implicit val format: OFormat[RemoveRequestDetails] = Json.format[RemoveRequestDetails]
 }

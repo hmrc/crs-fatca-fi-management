@@ -23,7 +23,7 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.crsfatcafimanagement.auth.AuthActionSets
 import uk.gov.hmrc.crsfatcafimanagement.config.AppConfig
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.RequestDetails
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateRequestDetails, RemoveRequestDetails}
 import uk.gov.hmrc.crsfatcafimanagement.models.error.ErrorDetails
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
 import uk.gov.hmrc.crsfatcafimanagement.services.CADXSubmissionService
@@ -46,7 +46,7 @@ class FIManagementController @Inject() (
   def createsFinancialInstitutions(): Action[JsValue] = authenticator.authenticateAll.async(parse.json) {
     implicit request =>
       request.body
-        .validate[RequestDetails]
+        .validate[CreateRequestDetails]
         .fold(
           invalid =>
             Future.successful {
@@ -55,6 +55,26 @@ class FIManagementController @Inject() (
             },
           validReq =>
             service.createFI(validReq).map {
+              case Right(_) => Ok
+              case Left(CreateSubmissionError(value)) =>
+                logger.warn(s"CreateSubmissionError $value")
+                InternalServerError(s"CreateSubmissionError $value")
+            }
+        )
+  }
+
+  def removeFinancialInstitution(): Action[JsValue] = authenticator.authenticateAll.async(parse.json) {
+    implicit request =>
+      request.body
+        .validate[RemoveRequestDetails]
+        .fold(
+          invalid =>
+            Future.successful {
+              logger.warn(s" removeFinancialInstitution Json Validation Failed: $invalid")
+              InternalServerError("Json Validation Failed")
+            },
+          validReq =>
+            service.removeFI(validReq).map {
               case Right(_) => Ok
               case Left(CreateSubmissionError(value)) =>
                 logger.warn(s"CreateSubmissionError $value")
