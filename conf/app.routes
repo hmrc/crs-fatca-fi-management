@@ -1,8 +1,9 @@
 # microservice specific routes
 
-POST       /financial-institutions/create                                           uk.gov.hmrc.crsfatcafimanagement.controllers.FIManagementController.createsFinancialInstitutions
-POST       /financial-institutions/remove                                           uk.gov.hmrc.crsfatcafimanagement.controllers.FIManagementController.removeFinancialInstitution
+POST        /financial-institutions/create                                         uk.gov.hmrc.crsfatcafimanagement.controllers.FIManagementController.createFinancialInstitution()
+PUT         /financial-institutions/update                                         uk.gov.hmrc.crsfatcafimanagement.controllers.FIManagementController.updateFinancialInstitution()
+POST        /financial-institutions/remove                                         uk.gov.hmrc.crsfatcafimanagement.controllers.FIManagementController.removeFinancialInstitution
 
-GET        /financial-institutions/:subscriptionId                                  uk.gov.hmrc.crsfatcafimanagement.controllers.FIManagementController.listFinancialInstitutions(subscriptionId: String)
+GET         /financial-institutions/:subscriptionId                                uk.gov.hmrc.crsfatcafimanagement.controllers.FIManagementController.listFinancialInstitutions(subscriptionId: String)
 
-GET        /financial-institutions/:subscriptionId/:financialInstitutionId          uk.gov.hmrc.crsfatcafimanagement.controllers.FIManagementController.viewFinancialInstitution(subscriptionId: String, financialInstitutionId: String)
+GET         /financial-institutions/:subscriptionId/:financialInstitutionId        uk.gov.hmrc.crsfatcafimanagement.controllers.FIManagementController.viewFinancialInstitution(subscriptionId: String, financialInstitutionId: String)

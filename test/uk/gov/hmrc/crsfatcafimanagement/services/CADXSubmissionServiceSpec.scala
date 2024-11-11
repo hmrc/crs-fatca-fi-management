@@ -24,7 +24,7 @@ import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.crsfatcafimanagement.SpecBase
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels._
-import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.{CREATE, DELETE}
+import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.{CREATE, DELETE, UPDATE}
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -37,6 +37,42 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
 
   val mockCADXConnector: CADXConnector = mock[CADXConnector]
 
+  val fiDetailsRequestJson: JsValue = Json.parse(
+    """
+      |{
+      |  "SubscriptionID": "123456789012345",
+      |  "FIID": "FI1234567890123",
+      |  "FIName": "Financial Institution",
+      |  "TINDetails": [
+      |    {
+      |      "TIN": "TIN123456789",
+      |      "TINType": "GIIN",
+      |      "IssuedBy": "US"
+      |    }
+      |  ],
+      |  "IsFIUser": false,
+      |  "IsFATCAReporting": true,
+      |  "PrimaryContactDetails": {
+      |    "PhoneNumber": "07123456789",
+      |    "ContactName": "John Doe",
+      |    "EmailAddress": "john.doe@example.com"
+      |  },
+      |  "SecondaryContactDetails": {
+      |    "PhoneNumber": "07876543210",
+      |    "ContactName": "Jane Doe",
+      |    "EmailAddress": "jane.doe@example.com"
+      |  },
+      |  "AddressDetails": {
+      |    "AddressLine1": "100 Sutton Street",
+      |    "AddressLine2": "Wokingham",
+      |    "AddressLine3": "Surrey",
+      |    "AddressLine4": "London",
+      |    "PostalCode": "DH14EJ",
+      |    "CountryCode": "GB"
+      |  }
+      |}""".stripMargin
+  )
+
   override lazy val app = applicationBuilder()
     .overrides(
       bind[CADXConnector].toInstance(mockCADXConnector)
@@ -45,41 +81,6 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
 
   "SubmissionService" - {
     "createFI" - {
-      val fiDetailsRequestJson: JsValue = Json.parse(
-        """
-          |{
-          |  "SubscriptionID": "123456789012345",
-          |  "FIID": "FI1234567890123",
-          |  "FIName": "Financial Institution",
-          |  "TINDetails": [
-          |    {
-          |      "TIN": "TIN123456789",
-          |      "TINType": "GIIN",
-          |      "IssuedBy": "US"
-          |    }
-          |  ],
-          |  "IsFIUser": false,
-          |  "IsFATCAReporting": true,
-          |  "PrimaryContactDetails": {
-          |    "PhoneNumber": "07123456789",
-          |    "ContactName": "John Doe",
-          |    "EmailAddress": "john.doe@example.com"
-          |  },
-          |  "SecondaryContactDetails": {
-          |    "PhoneNumber": "07876543210",
-          |    "ContactName": "Jane Doe",
-          |    "EmailAddress": "jane.doe@example.com"
-          |  },
-          |  "AddressDetails": {
-          |    "AddressLine1": "100 Sutton Street",
-          |    "AddressLine2": "Wokingham",
-          |    "AddressLine3": "Surrey",
-          |    "AddressLine4": "London",
-          |    "PostalCode": "DH14EJ",
-          |    "CountryCode": "GB"
-          |  }
-          |}""".stripMargin
-      )
       val createRequestDetails: CreateRequestDetails = fiDetailsRequestJson.as[CreateRequestDetails]
       val createFiReq: FIManagement[CreateFIDetailsRequest] = FIManagement(
         CreateFIDetailsRequest(
@@ -121,6 +122,37 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
           sub =>
             verify(mockCADXConnector, times(1)).createFI(is(createFiReq))(any[HeaderCarrier](), any[ExecutionContext]())
             sub mustBe Left(CreateSubmissionError(500))
+        }
+      }
+    }
+
+    "updateFI" - {
+      val createRequestDetails: CreateRequestDetails = fiDetailsRequestJson.as[CreateRequestDetails]
+      val createFiReq: FIManagement[CreateFIDetailsRequest] = FIManagement(
+        CreateFIDetailsRequest(
+          RequestCommon = RequestCommon(
+            OriginatingSystem = "crs-fatca-fi-management",
+            TransmittingSystem = "crs-fatca-fi-management",
+            RequestType = UPDATE,
+            Regime = "CRSFATCA",
+            RequestParameters = List.empty
+          ),
+          RequestDetails = createRequestDetails
+        )
+      )
+
+      "must  return UpdateSubscription with OK status when connector response with ok status" in {
+        val service = app.injector.instanceOf[CADXSubmissionService]
+
+        when(mockCADXConnector.createFI(is(createFiReq))(any[HeaderCarrier](), any[ExecutionContext]()))
+          .thenReturn(Future.successful(HttpResponse(OK, "Good Response")))
+
+        val result = service.createFI(createRequestDetails, UPDATE)
+
+        whenReady(result) {
+          sub =>
+            verify(mockCADXConnector, times(1)).createFI(is(createFiReq))(any[HeaderCarrier](), any[ExecutionContext]())
+            sub mustBe Right(())
         }
       }
     }
