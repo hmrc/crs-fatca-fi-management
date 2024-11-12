@@ -31,6 +31,7 @@ import uk.gov.hmrc.crsfatcafimanagement.auth.{AllowAllAuthAction, FakeAllowAllAu
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateRequestDetails, RemoveRequestDetails}
+import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.{CREATE, UPDATE}
 import uk.gov.hmrc.crsfatcafimanagement.models.error.ErrorDetails
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
 import uk.gov.hmrc.crsfatcafimanagement.models.{FIDetail, ViewFIDetailsResponse}
@@ -227,7 +228,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return OK when UpdateSubscription was successful" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[CreateRequestDetails]())(
+            .createFI(any[CreateRequestDetails](), mockitoEq(CREATE))(
               any[HeaderCarrier](),
               any[ExecutionContext]()
             )
@@ -240,7 +241,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
         val request =
           FakeRequest(
             POST,
-            routes.FIManagementController.createsFinancialInstitutions.url
+            routes.FIManagementController.createFinancialInstitution().url
           ).withJsonBody(fiDetailsRequestJson)
 
         val result = route(app, request).value
@@ -251,7 +252,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return 500 with a json validation error when receiving invalid json" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[CreateRequestDetails]())(
+            .createFI(any[CreateRequestDetails](), mockitoEq(CREATE))(
               any[HeaderCarrier](),
               any[ExecutionContext]()
             )
@@ -264,7 +265,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
         val request =
           FakeRequest(
             POST,
-            routes.FIManagementController.createsFinancialInstitutions.url
+            routes.FIManagementController.createFinancialInstitution().url
           ).withJsonBody(invalidFiDetailsRequestJson)
 
         val result = route(app, request).value
@@ -275,7 +276,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return a create submission error when not able to create FI" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[CreateRequestDetails]())(
+            .createFI(any[CreateRequestDetails](), mockitoEq(CREATE))(
               any[HeaderCarrier](),
               any[ExecutionContext]()
             )
@@ -288,7 +289,81 @@ class FIManagementControllerSpec extends SpecBase with Generators {
         val request =
           FakeRequest(
             POST,
-            routes.FIManagementController.createsFinancialInstitutions.url
+            routes.FIManagementController.createFinancialInstitution().url
+          ).withJsonBody(fiDetailsRequestJson)
+
+        val result = route(app, request).value
+        status(result) mustEqual INTERNAL_SERVER_ERROR
+
+      }
+    }
+
+    "updateFinancialInstitution" - {
+      "must return OK when UpdateSubscription was successful" in {
+        when(
+          mockCADXSubmissionService
+            .createFI(any[CreateRequestDetails](), mockitoEq(UPDATE))(
+              any[HeaderCarrier](),
+              any[ExecutionContext]()
+            )
+        ).thenReturn(
+          Future.successful(
+            Right(())
+          )
+        )
+
+        val request =
+          FakeRequest(
+            PUT,
+            routes.FIManagementController.updateFinancialInstitution().url
+          ).withJsonBody(fiDetailsRequestJson)
+
+        val result = route(app, request).value
+        status(result) mustEqual OK
+
+      }
+
+      "must return 500 with a json validation error when receiving invalid json" in {
+        when(
+          mockCADXSubmissionService
+            .createFI(any[CreateRequestDetails](), mockitoEq(UPDATE))(
+              any[HeaderCarrier](),
+              any[ExecutionContext]()
+            )
+        ).thenReturn(
+          Future.successful(
+            Right(())
+          )
+        )
+
+        val request =
+          FakeRequest(
+            PUT,
+            routes.FIManagementController.updateFinancialInstitution().url
+          ).withJsonBody(invalidFiDetailsRequestJson)
+
+        val result = route(app, request).value
+        status(result) mustEqual INTERNAL_SERVER_ERROR
+
+      }
+
+      "must return a create submission error when not able to create FI" in {
+        when(
+          mockCADXSubmissionService
+            .createFI(any[CreateRequestDetails](), mockitoEq(UPDATE))(
+              any[HeaderCarrier](),
+              any[ExecutionContext]()
+            )
+        ).thenReturn(
+          Future.successful(
+            Left(CreateSubmissionError(401))
+          )
+        )
+
+        val request =
+          FakeRequest(
+            PUT,
+            routes.FIManagementController.updateFinancialInstitution().url
           ).withJsonBody(fiDetailsRequestJson)
 
         val result = route(app, request).value

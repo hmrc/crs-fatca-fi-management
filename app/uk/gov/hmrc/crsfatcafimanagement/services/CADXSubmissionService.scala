@@ -20,7 +20,8 @@ import play.api.Logging
 import play.api.http.Status.OK
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels._
-import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.{CREATE, DELETE}
+import uk.gov.hmrc.crsfatcafimanagement.models.RequestType
+import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.DELETE
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -30,12 +31,13 @@ import scala.concurrent.{ExecutionContext, Future}
 class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging {
 
   def createFI(
-    requestDetails: CreateRequestDetails
+    requestDetails: CreateRequestDetails,
+    requestType: RequestType = RequestType.CREATE
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[CreateSubmissionError, Unit]] = {
     val reqCommon = RequestCommon(
       OriginatingSystem = "crs-fatca-fi-management",
       TransmittingSystem = "crs-fatca-fi-management",
-      RequestType = CREATE,
+      RequestType = requestType,
       Regime = "CRSFATCA",
       RequestParameters = List.empty
     )
