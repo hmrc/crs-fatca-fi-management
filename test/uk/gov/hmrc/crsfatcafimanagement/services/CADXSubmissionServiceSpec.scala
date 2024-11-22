@@ -82,8 +82,8 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
   "SubmissionService" - {
     "createFI" - {
       val createRequestDetails: CreateRequestDetails = fiDetailsRequestJson.as[CreateRequestDetails]
-      val createFiReq: FIManagement[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]] = FIManagement(
-        CreateOrUpdateFIDetailsRequest(
+      val createFiReq: FIManagement[FIDetailsRequest[CreateRequestDetails]] = FIManagement(
+        FIDetailsRequest(
           RequestCommon = RequestCommon(
             OriginatingSystem = "crs-fatca-fi-management",
             TransmittingSystem = "crs-fatca-fi-management",
@@ -101,7 +101,7 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
         when(
           mockCADXConnector.createFI(is(createFiReq))(any[HeaderCarrier](),
                                                       any[ExecutionContext](),
-                                                      any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]]]]()
+                                                      any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]()
           )
         )
           .thenReturn(Future.successful(HttpResponse(OK, "Good Response")))
@@ -112,7 +112,7 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
           sub =>
             verify(mockCADXConnector, times(1)).createFI(is(createFiReq))(any[HeaderCarrier](),
                                                                           any[ExecutionContext](),
-                                                                          any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]]]]
+                                                                          any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
             )
             sub mustBe Right(())
         }
@@ -124,7 +124,7 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
         when(
           mockCADXConnector.createFI(is(createFiReq))(any[HeaderCarrier](),
                                                       any[ExecutionContext](),
-                                                      any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]]]]
+                                                      any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
           )
         )
           .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
@@ -135,7 +135,7 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
           sub =>
             verify(mockCADXConnector, times(1)).createFI(is(createFiReq))(any[HeaderCarrier](),
                                                                           any[ExecutionContext](),
-                                                                          any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]]]]
+                                                                          any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
             )
             sub mustBe Left(CreateSubmissionError(500))
         }
@@ -144,8 +144,8 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
 
     "updateFI" - {
       val updateRequestDetails: UpdateRequestDetails = fiDetailsRequestJson.as[UpdateRequestDetails]
-      val updateFiReq: FIManagement[CreateOrUpdateFIDetailsRequest[UpdateRequestDetails]] = FIManagement(
-        CreateOrUpdateFIDetailsRequest(
+      val updateFiReq: FIManagement[FIDetailsRequest[UpdateRequestDetails]] = FIManagement(
+        FIDetailsRequest(
           RequestCommon = RequestCommon(
             OriginatingSystem = "crs-fatca-fi-management",
             TransmittingSystem = "crs-fatca-fi-management",
@@ -163,7 +163,7 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
         when(
           mockCADXConnector.createFI(is(updateFiReq))(any[HeaderCarrier](),
                                                       any[ExecutionContext](),
-                                                      any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[UpdateRequestDetails]]]]
+                                                      any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
           )
         )
           .thenReturn(Future.successful(HttpResponse(OK, "Good Response")))
@@ -174,7 +174,7 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
           sub =>
             verify(mockCADXConnector, times(1)).createFI(is(updateFiReq))(any[HeaderCarrier](),
                                                                           any[ExecutionContext](),
-                                                                          any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[UpdateRequestDetails]]]]
+                                                                          any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
             )
             sub mustBe Right(())
         }

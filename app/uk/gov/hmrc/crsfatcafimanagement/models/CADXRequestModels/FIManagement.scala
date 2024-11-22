@@ -24,10 +24,10 @@ object FIManagement {
   implicit def FIManagementFormat[R: Format]: OFormat[FIManagement[R]] = Json.format[FIManagement[R]]
 }
 
-final case class CreateOrUpdateFIDetailsRequest[T <: RequestDetails](RequestCommon: RequestCommon, RequestDetails: T)
+final case class FIDetailsRequest[T <: RequestDetails](RequestCommon: RequestCommon, RequestDetails: T)
 
-object CreateOrUpdateFIDetailsRequest {
-  implicit def format[T <: RequestDetails: OFormat]: OFormat[CreateOrUpdateFIDetailsRequest[T]] = Json.format[CreateOrUpdateFIDetailsRequest[T]]
+object FIDetailsRequest {
+  implicit def format[T <: RequestDetails: OFormat]: OFormat[FIDetailsRequest[T]] = Json.format[FIDetailsRequest[T]]
 }
 
 final case class RemoveFIDetailsRequest(RequestCommon: RequestCommon, RequestDetails: RemoveRequestDetails)

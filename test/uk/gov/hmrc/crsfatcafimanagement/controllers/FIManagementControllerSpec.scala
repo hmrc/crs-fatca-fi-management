@@ -31,8 +31,8 @@ import uk.gov.hmrc.crsfatcafimanagement.auth.{AllowAllAuthAction, FakeAllowAllAu
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{
-  CreateOrUpdateFIDetailsRequest,
   CreateRequestDetails,
+  FIDetailsRequest,
   FIManagement,
   RemoveRequestDetails,
   UpdateRequestDetails
@@ -237,7 +237,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
             .createOrUpdateFI(any[CreateRequestDetails]())(
               any[HeaderCarrier](),
               any[ExecutionContext](),
-              any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]]]]
+              any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
             )
         ).thenReturn(
           Future.successful(
@@ -262,7 +262,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
             .createOrUpdateFI(any[CreateRequestDetails]())(
               any[HeaderCarrier](),
               any[ExecutionContext](),
-              any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]]]]
+              any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
             )
         ).thenReturn(
           Future.successful(
@@ -287,7 +287,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
             .createOrUpdateFI(any[CreateRequestDetails]())(
               any[HeaderCarrier](),
               any[ExecutionContext](),
-              any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]]]]
+              any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
             )
         ).thenReturn(
           Future.successful(
@@ -314,7 +314,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
             .createOrUpdateFI(any[UpdateRequestDetails]())(
               any[HeaderCarrier](),
               any[ExecutionContext](),
-              any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[UpdateRequestDetails]]]]
+              any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
             )
         ).thenReturn(
           Future.successful(
@@ -339,7 +339,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
             .createOrUpdateFI(any[UpdateRequestDetails]())(
               any[HeaderCarrier](),
               any[ExecutionContext](),
-              any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[UpdateRequestDetails]]]]
+              any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
             )
         ).thenReturn(
           Future.successful(
@@ -364,7 +364,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
             .createOrUpdateFI(any[UpdateRequestDetails]())(
               any[HeaderCarrier](),
               any[ExecutionContext](),
-              any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[UpdateRequestDetails]]]]
+              any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
             )
         ).thenReturn(
           Future.successful(

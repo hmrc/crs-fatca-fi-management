@@ -36,7 +36,7 @@ class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging
   )(implicit
     hc: HeaderCarrier,
     ex: ExecutionContext,
-    writes: Writes[FIManagement[CreateOrUpdateFIDetailsRequest[T]]]
+    writes: Writes[FIManagement[FIDetailsRequest[T]]]
   ): Future[Either[CreateSubmissionError, Unit]] = {
     val requestType = requestDetails match {
       case _: CreateRequestDetails => RequestType.CREATE
@@ -49,7 +49,7 @@ class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging
       Regime = "CRFA",
       RequestParameters = List.empty
     )
-    val request: FIManagement[CreateOrUpdateFIDetailsRequest[T]] = FIManagement(CreateOrUpdateFIDetailsRequest(reqCommon, requestDetails))
+    val request: FIManagement[FIDetailsRequest[T]] = FIManagement(FIDetailsRequest(reqCommon, requestDetails))
     connector.createFI(request).map {
       res =>
         res.status match {

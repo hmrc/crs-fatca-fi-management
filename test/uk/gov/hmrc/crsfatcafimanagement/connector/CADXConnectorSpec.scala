@@ -26,8 +26,8 @@ import play.api.http.Status.OK
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{
-  CreateOrUpdateFIDetailsRequest,
   CreateRequestDetails,
+  FIDetailsRequest,
   FIManagement,
   RemoveFIDetailsRequest,
   UpdateRequestDetails
@@ -60,7 +60,7 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
           OK
         )
 
-        forAll(arbitrary[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]]) {
+        forAll(arbitrary[FIDetailsRequest[CreateRequestDetails]]) {
           sub =>
             val result = connector.createFI(FIManagement(sub))
             result.futureValue.status mustBe OK
@@ -69,7 +69,7 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
 
       "must return an error status for failed update Subscription" in {
 
-        forAll(arbitrary[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]], errorCodes) {
+        forAll(arbitrary[FIDetailsRequest[CreateRequestDetails]], errorCodes) {
           (sub, errorCode) =>
             stubResponse(
               "/ASMService/v1/FIManagement",
@@ -88,7 +88,7 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
           OK
         )
 
-        forAll(arbitrary[CreateOrUpdateFIDetailsRequest[UpdateRequestDetails]]) {
+        forAll(arbitrary[FIDetailsRequest[UpdateRequestDetails]]) {
           sub =>
             val result = connector.createFI(FIManagement(sub))
             result.futureValue.status mustBe OK
@@ -97,7 +97,7 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
 
       "must return an error status for failed update Subscription" in {
 
-        forAll(arbitrary[CreateOrUpdateFIDetailsRequest[UpdateRequestDetails]], errorCodes) {
+        forAll(arbitrary[FIDetailsRequest[UpdateRequestDetails]], errorCodes) {
           (sub, errorCode) =>
             stubResponse(
               "/ASMService/v1/FIManagement",
