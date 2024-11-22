@@ -20,7 +20,7 @@ import org.mockito.ArgumentMatchers.{any, eq => is}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.Status._
 import play.api.inject.bind
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.crsfatcafimanagement.SpecBase
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels._
@@ -82,13 +82,13 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
   "SubmissionService" - {
     "createFI" - {
       val createRequestDetails: CreateRequestDetails = fiDetailsRequestJson.as[CreateRequestDetails]
-      val createFiReq: FIManagement[CreateFIDetailsRequest] = FIManagement(
-        CreateFIDetailsRequest(
+      val createFiReq: FIManagement[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]] = FIManagement(
+        CreateOrUpdateFIDetailsRequest(
           RequestCommon = RequestCommon(
             OriginatingSystem = "crs-fatca-fi-management",
             TransmittingSystem = "crs-fatca-fi-management",
             RequestType = CREATE,
-            Regime = "CRSFATCA",
+            Regime = "CRFA",
             RequestParameters = List.empty
           ),
           RequestDetails = createRequestDetails
@@ -98,14 +98,22 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
       "must  return UpdateSubscription with OK status when connector response with ok status" in {
         val service = app.injector.instanceOf[CADXSubmissionService]
 
-        when(mockCADXConnector.createFI(is(createFiReq))(any[HeaderCarrier](), any[ExecutionContext]()))
+        when(
+          mockCADXConnector.createFI(is(createFiReq))(any[HeaderCarrier](),
+                                                      any[ExecutionContext](),
+                                                      any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]]]]()
+          )
+        )
           .thenReturn(Future.successful(HttpResponse(OK, "Good Response")))
 
-        val result = service.createFI(createRequestDetails)
+        val result = service.createOrUpdateFI(createRequestDetails)
 
         whenReady(result) {
           sub =>
-            verify(mockCADXConnector, times(1)).createFI(is(createFiReq))(any[HeaderCarrier](), any[ExecutionContext]())
+            verify(mockCADXConnector, times(1)).createFI(is(createFiReq))(any[HeaderCarrier](),
+                                                                          any[ExecutionContext](),
+                                                                          any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]]]]
+            )
             sub mustBe Right(())
         }
       }
@@ -113,45 +121,61 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
       "must have UpdateSubscriptionError when connector response with not ok status" in {
         val service = app.injector.instanceOf[CADXSubmissionService]
 
-        when(mockCADXConnector.createFI(is(createFiReq))(any[HeaderCarrier](), any[ExecutionContext]()))
+        when(
+          mockCADXConnector.createFI(is(createFiReq))(any[HeaderCarrier](),
+                                                      any[ExecutionContext](),
+                                                      any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]]]]
+          )
+        )
           .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
-        val result = service.createFI(createRequestDetails)
+        val result = service.createOrUpdateFI(createRequestDetails)
 
         whenReady(result) {
           sub =>
-            verify(mockCADXConnector, times(1)).createFI(is(createFiReq))(any[HeaderCarrier](), any[ExecutionContext]())
+            verify(mockCADXConnector, times(1)).createFI(is(createFiReq))(any[HeaderCarrier](),
+                                                                          any[ExecutionContext](),
+                                                                          any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]]]]
+            )
             sub mustBe Left(CreateSubmissionError(500))
         }
       }
     }
 
     "updateFI" - {
-      val createRequestDetails: CreateRequestDetails = fiDetailsRequestJson.as[CreateRequestDetails]
-      val createFiReq: FIManagement[CreateFIDetailsRequest] = FIManagement(
-        CreateFIDetailsRequest(
+      val updateRequestDetails: UpdateRequestDetails = fiDetailsRequestJson.as[UpdateRequestDetails]
+      val updateFiReq: FIManagement[CreateOrUpdateFIDetailsRequest[UpdateRequestDetails]] = FIManagement(
+        CreateOrUpdateFIDetailsRequest(
           RequestCommon = RequestCommon(
             OriginatingSystem = "crs-fatca-fi-management",
             TransmittingSystem = "crs-fatca-fi-management",
             RequestType = UPDATE,
-            Regime = "CRSFATCA",
+            Regime = "CRFA",
             RequestParameters = List.empty
           ),
-          RequestDetails = createRequestDetails
+          RequestDetails = updateRequestDetails
         )
       )
 
       "must  return UpdateSubscription with OK status when connector response with ok status" in {
         val service = app.injector.instanceOf[CADXSubmissionService]
 
-        when(mockCADXConnector.createFI(is(createFiReq))(any[HeaderCarrier](), any[ExecutionContext]()))
+        when(
+          mockCADXConnector.createFI(is(updateFiReq))(any[HeaderCarrier](),
+                                                      any[ExecutionContext](),
+                                                      any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[UpdateRequestDetails]]]]
+          )
+        )
           .thenReturn(Future.successful(HttpResponse(OK, "Good Response")))
 
-        val result = service.createFI(createRequestDetails, UPDATE)
+        val result = service.createOrUpdateFI(updateRequestDetails)
 
         whenReady(result) {
           sub =>
-            verify(mockCADXConnector, times(1)).createFI(is(createFiReq))(any[HeaderCarrier](), any[ExecutionContext]())
+            verify(mockCADXConnector, times(1)).createFI(is(updateFiReq))(any[HeaderCarrier](),
+                                                                          any[ExecutionContext](),
+                                                                          any[Writes[FIManagement[CreateOrUpdateFIDetailsRequest[UpdateRequestDetails]]]]
+            )
             sub mustBe Right(())
         }
       }
@@ -172,7 +196,7 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
             OriginatingSystem = "crs-fatca-fi-management",
             TransmittingSystem = "crs-fatca-fi-management",
             RequestType = DELETE,
-            Regime = "CRSFATCA",
+            Regime = "CRFA",
             RequestParameters = List.empty
           ),
           RequestDetails = removeFiDetailsRequestJson.as[RemoveRequestDetails]

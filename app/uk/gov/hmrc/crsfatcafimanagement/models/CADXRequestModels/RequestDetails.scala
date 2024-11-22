@@ -19,6 +19,20 @@ package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.crsfatcafimanagement.models.{AddressDetails, ContactDetails, TINDetails}
 
+sealed trait RequestDetails {
+  val SubscriptionID: String
+  val TINDetails: List[TINDetails]
+  val IsFIUser: Boolean
+  val IsFATCAReporting: Boolean
+  val AddressDetails: AddressDetails
+  val PrimaryContactDetails: Option[ContactDetails]   = None
+  val SecondaryContactDetails: Option[ContactDetails] = None
+}
+
+object RequestDetails {
+  implicit val format: OFormat[RequestDetails] = Json.format[RequestDetails]
+}
+
 final case class CreateRequestDetails(
   FIName: String,
   SubscriptionID: String,
@@ -26,12 +40,28 @@ final case class CreateRequestDetails(
   IsFIUser: Boolean,
   IsFATCAReporting: Boolean,
   AddressDetails: AddressDetails,
-  PrimaryContactDetails: Option[ContactDetails],
-  SecondaryContactDetails: Option[ContactDetails]
-)
+  override val PrimaryContactDetails: Option[ContactDetails] = None,
+  override val SecondaryContactDetails: Option[ContactDetails] = None
+) extends RequestDetails
 
 object CreateRequestDetails {
   implicit val format: OFormat[CreateRequestDetails] = Json.format[CreateRequestDetails]
+}
+
+final case class UpdateRequestDetails(
+  FIID: String,
+  FIName: String,
+  SubscriptionID: String,
+  TINDetails: List[TINDetails],
+  IsFIUser: Boolean,
+  IsFATCAReporting: Boolean,
+  AddressDetails: AddressDetails,
+  override val PrimaryContactDetails: Option[ContactDetails] = None,
+  override val SecondaryContactDetails: Option[ContactDetails] = None
+) extends RequestDetails
+
+object UpdateRequestDetails {
+  implicit val format: OFormat[UpdateRequestDetails] = Json.format[UpdateRequestDetails]
 }
 
 final case class RemoveRequestDetails(

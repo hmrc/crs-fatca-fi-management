@@ -25,7 +25,13 @@ import play.api.Application
 import play.api.http.Status.OK
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateFIDetailsRequest, FIManagement, RemoveFIDetailsRequest}
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{
+  CreateOrUpdateFIDetailsRequest,
+  CreateRequestDetails,
+  FIManagement,
+  RemoveFIDetailsRequest,
+  UpdateRequestDetails
+}
 import uk.gov.hmrc.crsfatcafimanagement.{SpecBase, WireMockServerHandler}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -54,7 +60,7 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
           OK
         )
 
-        forAll(arbitrary[CreateFIDetailsRequest]) {
+        forAll(arbitrary[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]]) {
           sub =>
             val result = connector.createFI(FIManagement(sub))
             result.futureValue.status mustBe OK
@@ -63,7 +69,35 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
 
       "must return an error status for failed update Subscription" in {
 
-        forAll(arbitrary[CreateFIDetailsRequest], errorCodes) {
+        forAll(arbitrary[CreateOrUpdateFIDetailsRequest[CreateRequestDetails]], errorCodes) {
+          (sub, errorCode) =>
+            stubResponse(
+              "/ASMService/v1/FIManagement",
+              errorCode
+            )
+
+            val result = connector.createFI(FIManagement(sub))
+            result.futureValue.status mustBe errorCode
+        }
+      }
+    }
+    "update FI" - {
+      "must return status as OK for update Subscription" in {
+        stubResponse(
+          "/ASMService/v1/FIManagement",
+          OK
+        )
+
+        forAll(arbitrary[CreateOrUpdateFIDetailsRequest[UpdateRequestDetails]]) {
+          sub =>
+            val result = connector.createFI(FIManagement(sub))
+            result.futureValue.status mustBe OK
+        }
+      }
+
+      "must return an error status for failed update Subscription" in {
+
+        forAll(arbitrary[CreateOrUpdateFIDetailsRequest[UpdateRequestDetails]], errorCodes) {
           (sub, errorCode) =>
             stubResponse(
               "/ASMService/v1/FIManagement",
