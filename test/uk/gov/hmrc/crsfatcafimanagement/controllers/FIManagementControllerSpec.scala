@@ -22,7 +22,7 @@ import org.scalacheck.Arbitrary.arbitrary
 import play.api.Application
 import play.api.http.Status.OK
 import play.api.inject.bind
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -30,7 +30,13 @@ import uk.gov.hmrc.crsfatcafimanagement.SpecBase
 import uk.gov.hmrc.crsfatcafimanagement.auth.{AllowAllAuthAction, FakeAllowAllAuthAction}
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateRequestDetails, RemoveRequestDetails}
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{
+  CreateRequestDetails,
+  FIDetailsRequest,
+  FIManagement,
+  RemoveRequestDetails,
+  UpdateRequestDetails
+}
 import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.{CREATE, UPDATE}
 import uk.gov.hmrc.crsfatcafimanagement.models.error.ErrorDetails
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
@@ -228,9 +234,10 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return OK when UpdateSubscription was successful" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[CreateRequestDetails](), mockitoEq(CREATE))(
+            .createOrUpdateFI(any[CreateRequestDetails]())(
               any[HeaderCarrier](),
-              any[ExecutionContext]()
+              any[ExecutionContext](),
+              any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
             )
         ).thenReturn(
           Future.successful(
@@ -252,9 +259,10 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return 500 with a json validation error when receiving invalid json" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[CreateRequestDetails](), mockitoEq(CREATE))(
+            .createOrUpdateFI(any[CreateRequestDetails]())(
               any[HeaderCarrier](),
-              any[ExecutionContext]()
+              any[ExecutionContext](),
+              any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
             )
         ).thenReturn(
           Future.successful(
@@ -276,9 +284,10 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return a create submission error when not able to create FI" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[CreateRequestDetails](), mockitoEq(CREATE))(
+            .createOrUpdateFI(any[CreateRequestDetails]())(
               any[HeaderCarrier](),
-              any[ExecutionContext]()
+              any[ExecutionContext](),
+              any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
             )
         ).thenReturn(
           Future.successful(
@@ -302,9 +311,10 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return OK when UpdateSubscription was successful" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[CreateRequestDetails](), mockitoEq(UPDATE))(
+            .createOrUpdateFI(any[UpdateRequestDetails]())(
               any[HeaderCarrier](),
-              any[ExecutionContext]()
+              any[ExecutionContext](),
+              any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
             )
         ).thenReturn(
           Future.successful(
@@ -326,9 +336,10 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return 500 with a json validation error when receiving invalid json" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[CreateRequestDetails](), mockitoEq(UPDATE))(
+            .createOrUpdateFI(any[UpdateRequestDetails]())(
               any[HeaderCarrier](),
-              any[ExecutionContext]()
+              any[ExecutionContext](),
+              any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
             )
         ).thenReturn(
           Future.successful(
@@ -350,9 +361,10 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       "must return a create submission error when not able to create FI" in {
         when(
           mockCADXSubmissionService
-            .createFI(any[CreateRequestDetails](), mockitoEq(UPDATE))(
+            .createOrUpdateFI(any[UpdateRequestDetails]())(
               any[HeaderCarrier](),
-              any[ExecutionContext]()
+              any[ExecutionContext](),
+              any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
             )
         ).thenReturn(
           Future.successful(

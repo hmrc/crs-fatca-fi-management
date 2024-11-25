@@ -65,7 +65,7 @@ trait ModelGenerators {
 
   implicit val arbitraryFIDetail: Arbitrary[FIDetail] = Arbitrary {
     for {
-      fiId                    <- stringOfLength(15)
+      fiId                    <- stringOfLength(30)
       fiName                  <- stringOfLength(105)
       subscriptionId          <- validSubscriptionID
       tinDetails              <- arbitrary[TINDetails]
@@ -127,11 +127,18 @@ trait ModelGenerators {
       arbitrary[ViewFIDetails].map(ViewFIDetailsResponse.apply)
     }
 
-  implicit val arbitraryCreateFIDetails: Arbitrary[CreateFIDetailsRequest] = Arbitrary {
+  implicit val arbitraryCreateFIDetails: Arbitrary[FIDetailsRequest[CreateRequestDetails]] = Arbitrary {
     for {
       requestCommon  <- arbitrary[RequestCommon]
       requestDetails <- arbitrary[CreateRequestDetails]
-    } yield CreateFIDetailsRequest(requestCommon, requestDetails)
+    } yield FIDetailsRequest(requestCommon, requestDetails)
+  }
+
+  implicit val arbitraryUpdateFIDetails: Arbitrary[FIDetailsRequest[UpdateRequestDetails]] = Arbitrary {
+    for {
+      requestCommon  <- arbitrary[RequestCommon]
+      requestDetails <- arbitrary[UpdateRequestDetails]
+    } yield FIDetailsRequest(requestCommon, requestDetails)
   }
 
   implicit val arbitraryRemoveFIDetailsRequest: Arbitrary[RemoveFIDetailsRequest] = Arbitrary {
@@ -176,6 +183,30 @@ trait ModelGenerators {
       primaryContactDetails   <- arbitrary[ContactDetails]
       secondaryContactDetails <- arbitrary[ContactDetails]
     } yield CreateRequestDetails(
+      FIName = fiName,
+      SubscriptionID = subscriptionId,
+      TINDetails = List(tinDetails),
+      IsFIUser = isFIUser,
+      IsFATCAReporting = isFATCAReporting,
+      AddressDetails = addressDetails,
+      PrimaryContactDetails = Some(primaryContactDetails),
+      SecondaryContactDetails = Some(secondaryContactDetails)
+    )
+  }
+
+  implicit val arbitraryUpdateRequestDetails: Arbitrary[UpdateRequestDetails] = Arbitrary {
+    for {
+      fiid                    <- stringOfLength(30)
+      fiName                  <- stringOfLength(105)
+      subscriptionId          <- validSubscriptionID
+      tinDetails              <- arbitrary[TINDetails]
+      isFIUser                <- arbitrary[Boolean]
+      isFATCAReporting        <- arbitrary[Boolean]
+      addressDetails          <- arbitrary[AddressDetails]
+      primaryContactDetails   <- arbitrary[ContactDetails]
+      secondaryContactDetails <- arbitrary[ContactDetails]
+    } yield UpdateRequestDetails(
+      FIID = fiid,
       FIName = fiName,
       SubscriptionID = subscriptionId,
       TINDetails = List(tinDetails),

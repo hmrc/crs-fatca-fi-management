@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.connectors
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.crsfatcafimanagement.config.AppConfig
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateFIDetailsRequest, FIManagement, RemoveFIDetailsRequest}
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{FIDetailsRequest, FIManagement, RemoveFIDetailsRequest, RequestDetails}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HeaderNames, HttpReads, HttpResponse, StringContextOps}
 
@@ -37,7 +37,9 @@ class CADXConnector @Inject() (
   implicit val httpReads: HttpReads[HttpResponse] =
     (_: String, _: String, response: HttpResponse) => response
 
-  def createFI(submissionDetails: FIManagement[CreateFIDetailsRequest])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+  def createFI[T <: RequestDetails](
+    submissionDetails: FIManagement[FIDetailsRequest[T]]
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext, writes: Writes[FIManagement[FIDetailsRequest[T]]]): Future[HttpResponse] = {
     val serviceName = "submission"
 
     http

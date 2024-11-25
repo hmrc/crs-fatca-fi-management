@@ -18,6 +18,7 @@ package uk.gov.hmrc.crsfatcafimanagement.services
 
 import play.api.Logging
 import play.api.http.Status.OK
+import play.api.libs.json.Writes
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels._
 import uk.gov.hmrc.crsfatcafimanagement.models.RequestType
@@ -30,18 +31,25 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging {
 
-  def createFI(
-    requestDetails: CreateRequestDetails,
-    requestType: RequestType = RequestType.CREATE
-  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Either[CreateSubmissionError, Unit]] = {
+  def createOrUpdateFI[T <: RequestDetails](
+    requestDetails: T
+  )(implicit
+    hc: HeaderCarrier,
+    ex: ExecutionContext,
+    writes: Writes[FIManagement[FIDetailsRequest[T]]]
+  ): Future[Either[CreateSubmissionError, Unit]] = {
+    val requestType = requestDetails match {
+      case _: CreateRequestDetails => RequestType.CREATE
+      case _: UpdateRequestDetails => RequestType.UPDATE
+    }
     val reqCommon = RequestCommon(
       OriginatingSystem = "crs-fatca-fi-management",
       TransmittingSystem = "crs-fatca-fi-management",
       RequestType = requestType,
-      Regime = "CRSFATCA",
+      Regime = "CRFA",
       RequestParameters = List.empty
     )
-    val request: FIManagement[CreateFIDetailsRequest] = FIManagement(CreateFIDetailsRequest(reqCommon, requestDetails))
+    val request: FIManagement[FIDetailsRequest[T]] = FIManagement(FIDetailsRequest(reqCommon, requestDetails))
     connector.createFI(request).map {
       res =>
         res.status match {
@@ -60,7 +68,7 @@ class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging
       OriginatingSystem = "crs-fatca-fi-management",
       TransmittingSystem = "crs-fatca-fi-management",
       RequestType = DELETE,
-      Regime = "CRSFATCA",
+      Regime = "CRFA",
       RequestParameters = List.empty
     )
     val request: FIManagement[RemoveFIDetailsRequest] = FIManagement(RemoveFIDetailsRequest(reqCommon, requestDetails))

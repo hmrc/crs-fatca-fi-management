@@ -18,12 +18,12 @@ package uk.gov.hmrc.crsfatcafimanagement.controllers
 
 import com.google.inject.Inject
 import play.api.Logging
-import play.api.libs.json.{JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsResult, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.crsfatcafimanagement.auth.AuthActionSets
 import uk.gov.hmrc.crsfatcafimanagement.config.AppConfig
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateRequestDetails, RemoveRequestDetails}
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateRequestDetails, RemoveRequestDetails, RequestDetails, UpdateRequestDetails}
 import uk.gov.hmrc.crsfatcafimanagement.models.RequestType
 import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.{CREATE, UPDATE}
 import uk.gov.hmrc.crsfatcafimanagement.models.error.ErrorDetails
@@ -51,8 +51,11 @@ class FIManagementController @Inject() (
 
   private def submitFinancialInstitutions(requestType: RequestType): Action[JsValue] = authenticator.authenticateAll.async(parse.json) {
     implicit request =>
-      request.body
-        .validate[CreateRequestDetails]
+      val validated: JsResult[RequestDetails] = requestType match {
+        case CREATE => request.body.validate[CreateRequestDetails]
+        case UPDATE => request.body.validate[UpdateRequestDetails]
+      }
+      validated
         .fold(
           invalid =>
             Future.successful {
@@ -60,7 +63,7 @@ class FIManagementController @Inject() (
               InternalServerError("Json Validation Failed")
             },
           validReq =>
-            service.createFI(validReq, requestType).map {
+            service.createOrUpdateFI(validReq).map {
               case Right(_) => Ok
               case Left(CreateSubmissionError(value)) =>
                 logger.warn(s"CreateSubmissionError $value")
