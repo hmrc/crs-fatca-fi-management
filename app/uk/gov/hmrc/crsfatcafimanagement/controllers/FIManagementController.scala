@@ -18,7 +18,7 @@ package uk.gov.hmrc.crsfatcafimanagement.controllers
 
 import com.google.inject.Inject
 import play.api.Logging
-import play.api.libs.json.{JsResult, JsSuccess, JsValue, Json}
+import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.crsfatcafimanagement.auth.AuthActionSets
 import uk.gov.hmrc.crsfatcafimanagement.config.AppConfig
@@ -51,9 +51,15 @@ class FIManagementController @Inject() (
 
   private def submitFinancialInstitutions(requestType: RequestType): Action[JsValue] = authenticator.authenticateAll.async(parse.json) {
     implicit request =>
+      def stripType(json: JsValue): JsValue = json match {
+        case obj: JsObject => obj - "_type"
+        case other         => other
+      }
+      val sanitizedBody = stripType(request.body)
       val validated: JsResult[RequestDetails] = requestType match {
-        case CREATE => request.body.validate[CreateRequestDetails]
-        case UPDATE => request.body.validate[UpdateRequestDetails]
+        case CREATE => sanitizedBody.validate[CreateRequestDetails]
+        case UPDATE => sanitizedBody.validate[UpdateRequestDetails]
+        case _      => JsError(s"Unsupported requestType: $requestType")
       }
       validated
         .fold(

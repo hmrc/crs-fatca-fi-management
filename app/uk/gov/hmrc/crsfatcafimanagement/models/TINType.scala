@@ -16,16 +16,40 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models
 
-import enumeratum._
+import play.api.libs.json._
 
-sealed trait TINType extends EnumEntry
+sealed trait TINType
 
-object TINType extends PlayEnum[TINType] {
-
-  val values: IndexedSeq[TINType] = findValues
+object TINType {
 
   case object UTR extends TINType
   case object GIIN extends TINType
-  case object OTHER extends TINType
+  case object CRN extends TINType
+  case object TRN extends TINType
 
+  val allValues: Seq[TINType] = Seq(UTR, CRN, TRN, GIIN)
+
+  private val stringMapping: Map[String, TINType] = allValues
+    .map(
+      t => t.toString -> t
+    )
+    .toMap
+
+  private val reverseMapping: Map[TINType, String] = stringMapping.map(_.swap)
+
+  implicit val reads: Reads[TINType] = Reads {
+    case JsString(str) =>
+      stringMapping
+        .get(str)
+        .map(JsSuccess(_))
+        .getOrElse(JsError(s"Invalid TINType: $str"))
+    case _ => JsError("Invalid TINType")
+  }
+
+  implicit val writes: Writes[TINType] = Writes {
+    tinType =>
+      JsString(reverseMapping(tinType))
+  }
+
+  implicit val format: Format[TINType] = Format(reads, writes)
 }

@@ -57,7 +57,7 @@ trait ModelGenerators {
   implicit val arbitraryTINDetails: Arbitrary[TINDetails] =
     Arbitrary {
       for {
-        tinType  <- Gen.oneOf(TINType.values)
+        tinType  <- Gen.oneOf(TINType.allValues)
         tin      <- stringOfLength(25)
         issuedBy <- stringOfLength(2)
       } yield TINDetails(tinType, tin, issuedBy.toUpperCase)
