@@ -69,7 +69,7 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
             val stubbedResponse = response.modify(_.ViewFIDetails.ResponseDetails.FIDetails).setTo(List(fiDetail))
 
             stubResponse(
-              url = s"/ASMService/v1/VIEW/$subscriptionId",
+              url = s"/dac6/dct139b/v1/$subscriptionId",
               statusCode = OK,
               requestMethod = RequestMethod.GET,
               requestHeaders = Map.empty,
@@ -91,7 +91,7 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
                 val subscriptionId = fiDetail.SubscriptionID
 
                 stubResponse(
-                  url = s"/ASMService/v1/VIEW/$subscriptionId",
+                  url = s"/dac6/dct139b/v1/$subscriptionId",
                   statusCode = errorStatusCode,
                   requestMethod = RequestMethod.GET,
                   requestHeaders = Map.empty
@@ -114,7 +114,7 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
             val stubbedResponse = response.modify(_.ViewFIDetails.ResponseDetails.FIDetails).setTo(List(fiDetail))
 
             stubResponse(
-              url = s"/ASMService/v1/VIEW/$subscriptionId/$fiId",
+              url = s"/dac6/dct139b/v1/$subscriptionId/$fiId",
               statusCode = OK,
               requestMethod = RequestMethod.GET,
               requestHeaders = Map.empty,
@@ -137,7 +137,7 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
                 val fiId           = fiDetail.FIID
 
                 stubResponse(
-                  url = s"/ASMService/v1/VIEW/$subscriptionId/$fiId",
+                  url = s"/dac6/dct139b/v1/$subscriptionId/$fiId",
                   statusCode = errorStatusCode,
                   requestMethod = RequestMethod.GET,
                   requestHeaders = Map.empty

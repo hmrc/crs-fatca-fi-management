@@ -56,7 +56,7 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
     "create FI" - {
       "must return status as OK for update Subscription" in {
         stubResponse(
-          "/ASMService/v1/FIManagement",
+          "/dac6/dct139a/v1",
           OK
         )
 
@@ -72,7 +72,7 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
         forAll(arbitrary[FIDetailsRequest[CreateRequestDetails]], errorCodes) {
           (sub, errorCode) =>
             stubResponse(
-              "/ASMService/v1/FIManagement",
+              "/dac6/dct139a/v1",
               errorCode
             )
 
@@ -84,7 +84,7 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
     "update FI" - {
       "must return status as OK for update Subscription" in {
         stubResponse(
-          "/ASMService/v1/FIManagement",
+          "/dac6/dct139a/v1",
           OK
         )
 
@@ -100,7 +100,7 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
         forAll(arbitrary[FIDetailsRequest[UpdateRequestDetails]], errorCodes) {
           (sub, errorCode) =>
             stubResponse(
-              "/ASMService/v1/FIManagement",
+              "/dac6/dct139a/v1",
               errorCode
             )
 
@@ -112,7 +112,7 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
     "remove FI" - {
       "must return status as OK for removal request" in {
         stubResponse(
-          "/ASMService/v1/FIManagement",
+          "/dac6/dct139a/v1",
           OK
         )
 
@@ -128,7 +128,7 @@ class CADXConnectorSpec extends SpecBase with WireMockServerHandler with Generat
         forAll(arbitrary[RemoveFIDetailsRequest], errorCodes) {
           (req, errorCode) =>
             stubResponse(
-              "/ASMService/v1/FIManagement",
+              "/dac6/dct139a/v1",
               errorCode
             )
 
