@@ -70,7 +70,7 @@ class FIManagementController @Inject() (
             },
           validReq =>
             service.createOrUpdateFI(validReq).map {
-              case Right(_) => Ok
+              case Right(response) => Ok(response)
               case Left(CreateSubmissionError(value)) =>
                 logger.warn(s"CreateSubmissionError $value")
                 InternalServerError(s"CreateSubmissionError $value")
