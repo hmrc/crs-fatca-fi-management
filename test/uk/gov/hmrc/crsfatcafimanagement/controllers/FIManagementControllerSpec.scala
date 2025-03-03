@@ -241,7 +241,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
             )
         ).thenReturn(
           Future.successful(
-            Right(())
+            Right("testFIID")
           )
         )
 
@@ -266,7 +266,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
             )
         ).thenReturn(
           Future.successful(
-            Right(())
+            Right("testFIID")
           )
         )
 
@@ -318,7 +318,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
             )
         ).thenReturn(
           Future.successful(
-            Right(())
+            Right("testFIID")
           )
         )
 
@@ -343,7 +343,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
             )
         ).thenReturn(
           Future.successful(
-            Right(())
+            Right("testFIID")
           )
         )
 

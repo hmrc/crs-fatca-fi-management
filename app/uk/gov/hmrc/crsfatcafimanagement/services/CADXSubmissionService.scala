@@ -16,11 +16,9 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.services
 
-import org.apache.pekko.http.scaladsl.model.HttpResponse
 import play.api.Logging
 import play.api.http.Status.OK
 import play.api.libs.json.Writes
-import play.api.mvc.Result
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels._
 import uk.gov.hmrc.crsfatcafimanagement.models.RequestType
