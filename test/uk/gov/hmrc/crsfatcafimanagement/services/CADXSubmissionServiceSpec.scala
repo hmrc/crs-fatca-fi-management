@@ -104,7 +104,7 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
                                                       any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]()
           )
         )
-          .thenReturn(Future.successful(HttpResponse(OK, "Good Response")))
+          .thenReturn(Future.successful(HttpResponse(OK, "testFIID")))
 
         val result = service.createOrUpdateFI(createRequestDetails)
 
@@ -114,7 +114,7 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
                                                                           any[ExecutionContext](),
                                                                           any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
             )
-            sub mustBe Right(())
+            sub mustBe Right("testFIID")
         }
       }
 
@@ -166,7 +166,7 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
                                                       any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
           )
         )
-          .thenReturn(Future.successful(HttpResponse(OK, "Good Response")))
+          .thenReturn(Future.successful(HttpResponse(OK, "testFIID")))
 
         val result = service.createOrUpdateFI(updateRequestDetails)
 
@@ -176,7 +176,7 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
                                                                           any[ExecutionContext](),
                                                                           any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
             )
-            sub mustBe Right(())
+            sub mustBe Right("testFIID")
         }
       }
     }

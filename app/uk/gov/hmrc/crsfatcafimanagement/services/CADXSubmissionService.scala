@@ -37,7 +37,7 @@ class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging
     hc: HeaderCarrier,
     ex: ExecutionContext,
     writes: Writes[FIManagement[FIDetailsRequest[T]]]
-  ): Future[Either[CreateSubmissionError, Unit]] = {
+  ): Future[Either[CreateSubmissionError, String]] = {
     val requestType = requestDetails match {
       case _: CreateRequestDetails => RequestType.CREATE
       case _: UpdateRequestDetails => RequestType.UPDATE
@@ -53,7 +53,7 @@ class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging
     connector.createFI(request).map {
       res =>
         res.status match {
-          case OK => Right(())
+          case OK => Right(res.body)
           case status =>
             logger.warn(s"create submission Got Status $status")
             Left(CreateSubmissionError(status))
