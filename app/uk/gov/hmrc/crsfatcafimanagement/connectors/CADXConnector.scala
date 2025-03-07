@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HeaderNames, HttpReads, HttpResponse, StringContextOps}
 
 import java.net.URL
-import java.time.ZonedDateTime
+import java.time.{ZoneId, ZonedDateTime}
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import javax.inject.Inject
@@ -86,8 +86,8 @@ class CADXConnector @Inject() (
   }
 
   private[connectors] def addHeaders(eisEnvironment: String)(implicit headerCarrier: HeaderCarrier): Seq[(String, String)] = {
-    // HTTP-date format defined by RFC 7231 e.g. Fri, 01 Aug 2020 15:51:38 GMT+1
-    val formatter                      = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss O")
+    // HTTP-date format defined by RFC 7231 e.g. Fri, 01 Aug 2020 15:51:38 UTC
+    val formatter                      = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'UTC'").withZone(ZoneId.of("UTC"))
     val stripSession: String => String = (input: String) => input.replace("session-", "")
 
     Seq(
