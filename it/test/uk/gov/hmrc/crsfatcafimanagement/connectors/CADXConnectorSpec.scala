@@ -26,6 +26,7 @@ import play.api.libs.json.Json
 import play.api.{Application, Configuration}
 import uk.gov.hmrc.crsfatcafimanagement.SpecBase
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateRequestDetails, FIDetailsRequest, FIManagement, RequestCommon}
 import uk.gov.hmrc.crsfatcafimanagement.models.{FIDetail, ViewFIDetailsResponse}
 import uk.gov.hmrc.crsfatcafimanagement.wiremock.WireMockHelper
 
@@ -45,9 +46,17 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
 
   override lazy val app: Application = applicationBuilder()
     .configure(Configuration("microservice.services.get-financial-institutions.port" -> wireMockServer.port()))
+    .configure(Configuration("microservice.services.submission.port" -> wireMockServer.port()))
     .build()
 
   lazy val connector: CADXConnector = app.injector.instanceOf[CADXConnector]
+
+  private val requiredHeaders = Map(
+    "x-forwarded-host" -> "mdtp",
+    "x-regime-type"    -> "CRSFATCA",
+    "accept"           -> "application/json",
+    "content-type"     -> "application/json;charset=UTF-8"
+  )
 
   private val errorStatusCodes = Table(
     "errorStatus",
@@ -94,7 +103,7 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
                   url = s"/dac6/dct139b/v1/$subscriptionId",
                   statusCode = errorStatusCode,
                   requestMethod = RequestMethod.GET,
-                  requestHeaders = Map.empty
+                  requestHeaders = requiredHeaders
                 )
 
                 val result = connector.listFinancialInstitutions(subscriptionId).futureValue
@@ -117,7 +126,7 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
               url = s"/dac6/dct139b/v1/$subscriptionId/$fiId",
               statusCode = OK,
               requestMethod = RequestMethod.GET,
-              requestHeaders = Map.empty,
+              requestHeaders = requiredHeaders,
               responseBody = Json.prettyPrint(Json.toJson(stubbedResponse))
             )
 
@@ -140,7 +149,7 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
                   url = s"/dac6/dct139b/v1/$subscriptionId/$fiId",
                   statusCode = errorStatusCode,
                   requestMethod = RequestMethod.GET,
-                  requestHeaders = Map.empty
+                  requestHeaders = requiredHeaders
                 )
 
                 val result = connector.viewFinancialInstitution(subscriptionId, fiId).futureValue
@@ -149,6 +158,26 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
           }
       }
     }
+
+    "createFinancialInstitution" - {
+      "must return status OK when creating an FI" in {
+        forAll(arbitrary[CreateRequestDetails], arbitrary[RequestCommon], arbitrary[FIDetail]) {
+          (request, common, fiDetail) =>
+            stubResponse(
+              url = "/dac6/dct139a/v1",
+              statusCode = OK,
+              requestMethod = RequestMethod.POST,
+              requestHeaders = requiredHeaders,
+              responseBody = Json.prettyPrint(Json.toJson(fiDetail))
+            )
+
+            val result = connector.createFI(FIManagement(FIDetailsRequest(common, request))).futureValue
+            result.status mustBe OK
+            Json.parse(result.body).as[FIDetail] mustBe fiDetail
+        }
+      }
+    }
+
   }
 
 }
