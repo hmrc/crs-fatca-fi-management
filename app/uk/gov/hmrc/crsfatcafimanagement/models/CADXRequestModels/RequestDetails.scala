@@ -23,7 +23,6 @@ sealed trait RequestDetails {
   val SubscriptionID: String
   val TINDetails: List[TINDetails]
   val IsFIUser: Boolean
-  val IsFATCAReporting: Boolean
   val AddressDetails: AddressDetails
   val PrimaryContactDetails: Option[ContactDetails]   = None
   val SecondaryContactDetails: Option[ContactDetails] = None
@@ -38,7 +37,6 @@ final case class CreateRequestDetails(
   SubscriptionID: String,
   TINDetails: List[TINDetails],
   IsFIUser: Boolean,
-  IsFATCAReporting: Boolean,
   AddressDetails: AddressDetails,
   override val PrimaryContactDetails: Option[ContactDetails] = None,
   override val SecondaryContactDetails: Option[ContactDetails] = None
@@ -54,7 +52,6 @@ final case class UpdateRequestDetails(
   SubscriptionID: String,
   TINDetails: List[TINDetails],
   IsFIUser: Boolean,
-  IsFATCAReporting: Boolean,
   AddressDetails: AddressDetails,
   override val PrimaryContactDetails: Option[ContactDetails] = None,
   override val SecondaryContactDetails: Option[ContactDetails] = None
@@ -70,7 +67,6 @@ final case class RemoveRequestDetails(
   FIName: Option[String] = None,
   TINDetails: Option[List[TINDetails]] = None,
   IsFIUser: Option[Boolean] = None,
-  IsFATCAReporting: Option[Boolean] = None,
   PrimaryContactDetails: Option[ContactDetails] = None,
   SecondaryContactDetails: Option[ContactDetails] = None,
   AddressDetails: Option[AddressDetails] = None

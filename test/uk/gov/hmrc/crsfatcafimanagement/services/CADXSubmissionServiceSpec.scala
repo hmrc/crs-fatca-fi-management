@@ -51,7 +51,6 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
       |    }
       |  ],
       |  "IsFIUser": false,
-      |  "IsFATCAReporting": true,
       |  "PrimaryContactDetails": {
       |    "PhoneNumber": "07123456789",
       |    "ContactName": "John Doe",
