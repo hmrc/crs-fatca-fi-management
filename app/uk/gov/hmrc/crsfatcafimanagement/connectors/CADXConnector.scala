@@ -44,8 +44,8 @@ class CADXConnector @Inject() (
 
     http
       .post(url"${config.baseUrl(serviceName)}")
-      .withBody(Json.toJson(submissionDetails))
       .setHeader(extraHeaders(config, serviceName): _*)
+      .withBody(Json.toJson(submissionDetails))
       .execute[HttpResponse]
   }
 
@@ -54,8 +54,8 @@ class CADXConnector @Inject() (
 
     http
       .post(url"${config.baseUrl(serviceName)}")
-      .withBody(Json.toJson(removeDetails))
       .setHeader(extraHeaders(config, serviceName): _*)
+      .withBody(Json.toJson(removeDetails))
       .execute[HttpResponse]
   }
 
@@ -100,7 +100,7 @@ class CADXConnector @Inject() (
         )
         .getOrElse(UUID.randomUUID().toString),
       "x-regime-type" -> "CRSFATCA",
-      "content-type"  -> "application/json",
+      "content-type"  -> "application/json;charset=UTF-8",
       "accept"        -> "application/json",
       "Environment"   -> eisEnvironment
     )
