@@ -70,7 +70,6 @@ trait ModelGenerators {
       subscriptionId          <- validSubscriptionID
       tinDetails              <- arbitrary[TINDetails]
       isFIUser                <- arbitrary[Boolean]
-      isFATCAReporting        <- arbitrary[Boolean]
       addressDetails          <- arbitrary[AddressDetails]
       primaryContactDetails   <- arbitrary[ContactDetails]
       secondaryContactDetails <- arbitrary[ContactDetails]
@@ -80,7 +79,6 @@ trait ModelGenerators {
       SubscriptionID = subscriptionId,
       TINDetails = tinDetails,
       IsFIUser = isFIUser,
-      IsFATCAReporting = isFATCAReporting,
       AddressDetails = addressDetails,
       PrimaryContactDetails = primaryContactDetails,
       SecondaryContactDetails = secondaryContactDetails
@@ -178,7 +176,6 @@ trait ModelGenerators {
       subscriptionId          <- validSubscriptionID
       tinDetails              <- arbitrary[TINDetails]
       isFIUser                <- arbitrary[Boolean]
-      isFATCAReporting        <- arbitrary[Boolean]
       addressDetails          <- arbitrary[AddressDetails]
       primaryContactDetails   <- arbitrary[ContactDetails]
       secondaryContactDetails <- arbitrary[ContactDetails]
@@ -187,7 +184,6 @@ trait ModelGenerators {
       SubscriptionID = subscriptionId,
       TINDetails = List(tinDetails),
       IsFIUser = isFIUser,
-      IsFATCAReporting = isFATCAReporting,
       AddressDetails = addressDetails,
       PrimaryContactDetails = Some(primaryContactDetails),
       SecondaryContactDetails = Some(secondaryContactDetails)
@@ -201,7 +197,6 @@ trait ModelGenerators {
       subscriptionId          <- validSubscriptionID
       tinDetails              <- arbitrary[TINDetails]
       isFIUser                <- arbitrary[Boolean]
-      isFATCAReporting        <- arbitrary[Boolean]
       addressDetails          <- arbitrary[AddressDetails]
       primaryContactDetails   <- arbitrary[ContactDetails]
       secondaryContactDetails <- arbitrary[ContactDetails]
@@ -211,7 +206,6 @@ trait ModelGenerators {
       SubscriptionID = subscriptionId,
       TINDetails = List(tinDetails),
       IsFIUser = isFIUser,
-      IsFATCAReporting = isFATCAReporting,
       AddressDetails = addressDetails,
       PrimaryContactDetails = Some(primaryContactDetails),
       SecondaryContactDetails = Some(secondaryContactDetails)

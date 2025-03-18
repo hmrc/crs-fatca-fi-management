@@ -24,7 +24,6 @@ final case class FIDetail(
   SubscriptionID: String,
   TINDetails: TINDetails,
   IsFIUser: Boolean,
-  IsFATCAReporting: Boolean,
   AddressDetails: AddressDetails,
   PrimaryContactDetails: ContactDetails,
   SecondaryContactDetails: ContactDetails
