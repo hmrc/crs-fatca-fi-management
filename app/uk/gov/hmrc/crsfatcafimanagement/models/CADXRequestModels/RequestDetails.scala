@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Json, OWrites, Reads}
 import uk.gov.hmrc.crsfatcafimanagement.models.{AddressDetails, ContactDetails, TINDetails}
 
 sealed trait RequestDetails {
@@ -29,7 +29,12 @@ sealed trait RequestDetails {
 }
 
 object RequestDetails {
-  implicit val format: OFormat[RequestDetails] = Json.format[RequestDetails]
+
+  implicit val writes: OWrites[RequestDetails] = {
+    case c: CreateRequestDetails => CreateRequestDetails.writes.writes(c)
+    case u: UpdateRequestDetails => UpdateRequestDetails.writes.writes(u)
+  }
+
 }
 
 final case class CreateRequestDetails(
@@ -43,7 +48,8 @@ final case class CreateRequestDetails(
 ) extends RequestDetails
 
 object CreateRequestDetails {
-  implicit val format: OFormat[CreateRequestDetails] = Json.format[CreateRequestDetails]
+  implicit val reads: Reads[CreateRequestDetails]    = Json.reads[CreateRequestDetails]
+  implicit val writes: OWrites[CreateRequestDetails] = Json.writes[CreateRequestDetails]
 }
 
 final case class UpdateRequestDetails(
@@ -58,7 +64,8 @@ final case class UpdateRequestDetails(
 ) extends RequestDetails
 
 object UpdateRequestDetails {
-  implicit val format: OFormat[UpdateRequestDetails] = Json.format[UpdateRequestDetails]
+  implicit val reads: Reads[UpdateRequestDetails]    = Json.reads[UpdateRequestDetails]
+  implicit val writes: OWrites[UpdateRequestDetails] = Json.writes[UpdateRequestDetails]
 }
 
 final case class RemoveRequestDetails(
@@ -73,5 +80,6 @@ final case class RemoveRequestDetails(
 )
 
 object RemoveRequestDetails {
-  implicit val format: OFormat[RemoveRequestDetails] = Json.format[RemoveRequestDetails]
+  implicit val reads: Reads[RemoveRequestDetails]    = Json.reads[RemoveRequestDetails]
+  implicit val writes: OWrites[RemoveRequestDetails] = Json.writes[RemoveRequestDetails]
 }
