@@ -16,18 +16,18 @@
 
 package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 
-import play.api.libs.json.{Format, Json, OFormat}
+import play.api.libs.json.{Json, OFormat, OWrites, Writes}
 
 final case class FIManagement[R](FIManagement: R)
 
 object FIManagement {
-  implicit def FIManagementFormat[R: Format]: OFormat[FIManagement[R]] = Json.format[FIManagement[R]]
+  implicit def writes[R: Writes]: OWrites[FIManagement[R]] = Json.writes[FIManagement[R]]
 }
 
 final case class FIDetailsRequest[T <: RequestDetails](RequestCommon: RequestCommon, RequestDetails: T)
 
 object FIDetailsRequest {
-  implicit def format[T <: RequestDetails: OFormat]: OFormat[FIDetailsRequest[T]] = Json.format[FIDetailsRequest[T]]
+  implicit def writes[T <: RequestDetails: OWrites]: OWrites[FIDetailsRequest[T]] = Json.writes[FIDetailsRequest[T]]
 }
 
 final case class RemoveFIDetailsRequest(RequestCommon: RequestCommon, RequestDetails: RemoveRequestDetails)
