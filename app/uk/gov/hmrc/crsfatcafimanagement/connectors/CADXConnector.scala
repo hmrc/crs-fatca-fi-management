@@ -44,7 +44,7 @@ class CADXConnector @Inject() (
 
     http
       .post(url"${config.baseUrl(serviceName)}")
-      .setHeader(extraHeaders(config, serviceName): _*)
+      .setHeader(extraHeaders(config, serviceName, utf8 = true): _*)
       .withBody(Json.toJson(submissionDetails))
       .execute[HttpResponse]
   }
@@ -54,7 +54,7 @@ class CADXConnector @Inject() (
 
     http
       .post(url"${config.baseUrl(serviceName)}")
-      .setHeader(extraHeaders(config, serviceName): _*)
+      .setHeader(extraHeaders(config, serviceName, utf8 = true): _*)
       .withBody(Json.toJson(removeDetails))
       .execute[HttpResponse]
   }
@@ -75,18 +75,23 @@ class CADXConnector @Inject() (
 
   private[connectors] def extraHeaders(
     config: AppConfig,
-    serviceName: String
+    serviceName: String,
+    utf8: Boolean = false
   )(implicit headerCarrier: HeaderCarrier): Seq[(String, String)] = {
     val newHeaders = headerCarrier
       .copy(authorization = Some(Authorization(s"Bearer ${config.bearerToken(serviceName)}")))
 
-    newHeaders.headers(Seq(HeaderNames.authorisation)) ++ addHeaders(config.environment(serviceName))
+    newHeaders.headers(Seq(HeaderNames.authorisation)) ++ addHeaders(
+      config.environment(serviceName),
+      utf8
+    )
   }
 
-  private[connectors] def addHeaders(eisEnvironment: String)(implicit headerCarrier: HeaderCarrier): Seq[(String, String)] = {
+  private[connectors] def addHeaders(eisEnvironment: String, utf8: Boolean)(implicit headerCarrier: HeaderCarrier): Seq[(String, String)] = {
     // HTTP-date format defined by RFC 7231 e.g. Fri, 01 Aug 2020 15:51:38 UTC
     val formatter                      = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'UTC'").withZone(ZoneId.of("UTC"))
     val stripSession: String => String = (input: String) => input.replace("session-", "")
+    val contentType                    = if (utf8) "application/json;charset=UTF-8" else "application/json"
 
     Seq(
       "x-forwarded-host" -> "mdtp",
@@ -98,7 +103,7 @@ class CADXConnector @Inject() (
         )
         .getOrElse(UUID.randomUUID().toString),
       "x-regime-type" -> "CRSFATCA",
-      "content-type"  -> "application/json",
+      "content-type"  -> contentType,
       "accept"        -> "application/json",
       "Environment"   -> eisEnvironment
     )

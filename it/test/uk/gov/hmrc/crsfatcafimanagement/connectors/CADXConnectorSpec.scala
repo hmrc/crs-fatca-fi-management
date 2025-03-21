@@ -58,6 +58,13 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
     "content-type"     -> "application/json"
   )
 
+  private val requiredUtf8Headers = Map(
+    "x-forwarded-host" -> "mdtp",
+    "x-regime-type"    -> "CRSFATCA",
+    "accept"           -> "application/json",
+    "content-type"     -> "application/json;charset=UTF-8"
+  )
+
   private val errorStatusCodes = Table(
     "errorStatus",
     FORBIDDEN,
@@ -167,7 +174,7 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
               url = "/dac6/dct139a/v1",
               statusCode = OK,
               requestMethod = RequestMethod.POST,
-              requestHeaders = requiredHeaders,
+              requestHeaders = requiredUtf8Headers,
               responseBody = Json.prettyPrint(Json.toJson(fiDetail))
             )
 
