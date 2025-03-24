@@ -23,6 +23,7 @@ final case class FIDetail(
   FIName: String,
   SubscriptionID: String,
   TINDetails: TINDetails,
+  GIIN: Option[String],
   IsFIUser: Boolean,
   AddressDetails: AddressDetails,
   PrimaryContactDetails: ContactDetails,
