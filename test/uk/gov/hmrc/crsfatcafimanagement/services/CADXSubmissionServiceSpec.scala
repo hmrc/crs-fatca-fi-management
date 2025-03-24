@@ -43,13 +43,8 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
       |  "SubscriptionID": "123456789012345",
       |  "FIID": "FI1234567890123",
       |  "FIName": "Financial Institution",
-      |  "TINDetails": [
-      |    {
-      |      "TIN": "TIN123456789",
-      |      "TINType": "GIIN",
-      |      "IssuedBy": "US"
-      |    }
-      |  ],
+      |  "TINDetails": [],
+      |  "GIIN": "TIN123456789",
       |  "IsFIUser": false,
       |  "PrimaryContactDetails": {
       |    "PhoneNumber": "07123456789",

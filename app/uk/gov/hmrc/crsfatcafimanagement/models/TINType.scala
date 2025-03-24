@@ -23,11 +23,10 @@ sealed trait TINType
 object TINType {
 
   case object UTR extends TINType
-  case object GIIN extends TINType
   case object CRN extends TINType
   case object TRN extends TINType
 
-  val allValues: Seq[TINType] = Seq(UTR, CRN, TRN, GIIN)
+  val allValues: Seq[TINType] = Seq(UTR, CRN, TRN)
 
   private val stringMapping: Map[String, TINType] = allValues
     .map(

@@ -69,6 +69,7 @@ trait ModelGenerators {
       fiName                  <- stringOfLength(105)
       subscriptionId          <- validSubscriptionID
       tinDetails              <- arbitrary[TINDetails]
+      giin                    <- Gen.option(stringOfLength(8))
       isFIUser                <- arbitrary[Boolean]
       addressDetails          <- arbitrary[AddressDetails]
       primaryContactDetails   <- arbitrary[ContactDetails]
@@ -78,6 +79,7 @@ trait ModelGenerators {
       FIName = fiName,
       SubscriptionID = subscriptionId,
       TINDetails = tinDetails,
+      GIIN = giin,
       IsFIUser = isFIUser,
       AddressDetails = addressDetails,
       PrimaryContactDetails = primaryContactDetails,
