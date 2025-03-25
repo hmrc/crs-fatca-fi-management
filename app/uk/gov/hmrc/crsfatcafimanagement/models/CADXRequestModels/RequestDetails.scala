@@ -22,6 +22,7 @@ import uk.gov.hmrc.crsfatcafimanagement.models.{AddressDetails, ContactDetails, 
 sealed trait RequestDetails {
   val SubscriptionID: String
   val TINDetails: List[TINDetails]
+  val GIIN: Option[String]
   val IsFIUser: Boolean
   val AddressDetails: AddressDetails
   val PrimaryContactDetails: Option[ContactDetails]   = None
@@ -41,6 +42,7 @@ final case class CreateRequestDetails(
   FIName: String,
   SubscriptionID: String,
   TINDetails: List[TINDetails],
+  GIIN: Option[String],
   IsFIUser: Boolean,
   AddressDetails: AddressDetails,
   override val PrimaryContactDetails: Option[ContactDetails] = None,
@@ -57,6 +59,7 @@ final case class UpdateRequestDetails(
   FIName: String,
   SubscriptionID: String,
   TINDetails: List[TINDetails],
+  GIIN: Option[String],
   IsFIUser: Boolean,
   AddressDetails: AddressDetails,
   override val PrimaryContactDetails: Option[ContactDetails] = None,
@@ -73,6 +76,7 @@ final case class RemoveRequestDetails(
   FIID: String,
   FIName: Option[String] = None,
   TINDetails: Option[List[TINDetails]] = None,
+  GIIN: Option[String] = None,
   IsFIUser: Option[Boolean] = None,
   PrimaryContactDetails: Option[ContactDetails] = None,
   SecondaryContactDetails: Option[ContactDetails] = None,

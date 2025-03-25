@@ -29,6 +29,7 @@ class RequestDetailsSpec extends SpecBase {
         "FIName",
         "SubscriptionID",
         List.empty,
+        Some("GIIN"),
         IsFIUser = true,
         AddressDetails(
           "AddressLine1",
@@ -54,6 +55,7 @@ class RequestDetailsSpec extends SpecBase {
           |  "SubscriptionID" : "SubscriptionID",
           |  "TINDetails" : [ ],
           |  "IsFIUser" : true,
+          |  "GIIN" : "GIIN",
           |  "AddressDetails" : {
           |    "AddressLine1" : "AddressLine1",
           |    "AddressLine3" : "AddressLine3",
@@ -78,6 +80,7 @@ class RequestDetailsSpec extends SpecBase {
         "FIName",
         "SubscriptionID",
         List.empty,
+        Some("GIIN"),
         IsFIUser = true,
         AddressDetails(
           "AddressLine1",
@@ -103,6 +106,7 @@ class RequestDetailsSpec extends SpecBase {
           |  "FIName": "FIName",
           |  "SubscriptionID": "SubscriptionID",
           |  "TINDetails": [],
+          |  "GIIN": "GIIN",
           |  "IsFIUser": true,
           |  "AddressDetails": {
           |    "AddressLine1": "AddressLine1",
