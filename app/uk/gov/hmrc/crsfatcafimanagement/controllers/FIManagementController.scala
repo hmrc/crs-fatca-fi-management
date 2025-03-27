@@ -98,21 +98,19 @@ class FIManagementController @Inject() (
         )
   }
 
-  def listFinancialInstitutions(subscriptionId: String): Action[AnyContent] =
-    Action.async { // TODO: DAC6-3255 Enable auth when integrated with frontend
-      implicit request =>
-        connector
-          .listFinancialInstitutions(subscriptionId)
-          .map(convertToResult)
-    }
+  def listFinancialInstitutions(subscriptionId: String): Action[AnyContent] = authenticator.authenticateAll.async {
+    implicit request =>
+      connector
+        .listFinancialInstitutions(subscriptionId)
+        .map(convertToResult)
+  }
 
-  def viewFinancialInstitution(subscriptionId: String, fiId: String): Action[AnyContent] =
-    Action.async { // TODO: DAC6-3255 Enable auth when integrated with frontend
-      implicit request =>
-        connector
-          .viewFinancialInstitution(subscriptionId, fiId)
-          .map(convertToResult)
-    }
+  def viewFinancialInstitution(subscriptionId: String, fiId: String): Action[AnyContent] = authenticator.authenticateAll.async {
+    implicit request =>
+      connector
+        .viewFinancialInstitution(subscriptionId, fiId)
+        .map(convertToResult)
+  }
 
   private def convertToResult(httpResponse: HttpResponse): Result =
     httpResponse.status match {
