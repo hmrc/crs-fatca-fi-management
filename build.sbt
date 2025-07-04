@@ -22,7 +22,6 @@ lazy val microservice = Project("crs-fatca-fi-management", file("."))
     )
   )
   .settings(inConfig(Test)(testSettings): _*)
-  .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
 
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(
