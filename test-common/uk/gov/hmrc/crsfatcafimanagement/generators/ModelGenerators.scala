@@ -31,7 +31,7 @@ trait ModelGenerators {
     for {
       addressLine1 <- stringOfLength(35)
       addressLine2 <- Gen.option(stringOfLength(35))
-      addressLine3 <- stringOfLength(35)
+      addressLine3 <- Gen.option(stringOfLength(35))
       addressLine4 <- Gen.option(stringOfLength(35))
       postalCode   <- Gen.option(stringOfLength(10))
       countryCode  <- Gen.option(stringOfLength(2))
