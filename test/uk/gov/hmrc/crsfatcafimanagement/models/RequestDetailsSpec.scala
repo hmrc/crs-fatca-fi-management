@@ -34,7 +34,7 @@ class RequestDetailsSpec extends SpecBase {
         AddressDetails(
           "AddressLine1",
           None,
-          "AddressLine3",
+          Some("AddressLine3"),
           None,
           Some("GB"),
           Some("AA1 1AA")
@@ -85,7 +85,7 @@ class RequestDetailsSpec extends SpecBase {
         AddressDetails(
           "AddressLine1",
           None,
-          "AddressLine3",
+          Some("AddressLine3"),
           None,
           Some("GB"),
           Some("AA1 1AA")
