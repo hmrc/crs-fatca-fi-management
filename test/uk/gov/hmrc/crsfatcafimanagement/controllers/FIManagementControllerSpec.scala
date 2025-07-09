@@ -30,14 +30,7 @@ import uk.gov.hmrc.crsfatcafimanagement.SpecBase
 import uk.gov.hmrc.crsfatcafimanagement.auth.{AllowAllAuthAction, FakeAllowAllAuthAction}
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{
-  CreateRequestDetails,
-  FIDetailsRequest,
-  FIManagement,
-  RemoveRequestDetails,
-  UpdateRequestDetails
-}
-import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.{CREATE, UPDATE}
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels._
 import uk.gov.hmrc.crsfatcafimanagement.models.error.ErrorDetails
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
 import uk.gov.hmrc.crsfatcafimanagement.models.{FIDetail, ViewFIDetailsResponse}
