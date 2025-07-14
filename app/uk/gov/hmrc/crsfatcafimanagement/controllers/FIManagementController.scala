@@ -99,7 +99,7 @@ class FIManagementController @Inject() (
   }
 
   def listFinancialInstitutions(subscriptionId: String): Action[AnyContent] =
-    Action.async { // TODO: DAC6-3255 Enable auth when integrated with frontend
+    authenticator.authenticateAll.async {
       implicit request =>
         connector
           .listFinancialInstitutions(subscriptionId)
@@ -107,7 +107,7 @@ class FIManagementController @Inject() (
     }
 
   def viewFinancialInstitution(subscriptionId: String, fiId: String): Action[AnyContent] =
-    Action.async { // TODO: DAC6-3255 Enable auth when integrated with frontend
+    authenticator.authenticateAll.async {
       implicit request =>
         connector
           .viewFinancialInstitution(subscriptionId, fiId)
