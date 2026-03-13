@@ -114,6 +114,7 @@ class FIManagementController @Inject() (
           .map(convertToResult)
     }
 
+  //TODO: below not really needed
   private def convertToResult(httpResponse: HttpResponse): Result =
     httpResponse.status match {
       case OK        => Ok(httpResponse.body)
