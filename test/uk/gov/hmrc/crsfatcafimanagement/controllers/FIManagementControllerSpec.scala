@@ -252,19 +252,6 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       }
 
       "must return 500 with a json validation error when receiving invalid json" in {
-//        when(
-//          mockCADXSubmissionService
-//            .createOrUpdateFI(any[CreateRequestDetails]())(
-//              any[HeaderCarrier](),
-//              any[ExecutionContext](),
-//              any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
-//            )
-//        ).thenReturn(
-//          Future.successful(
-//            Right("testFIID")
-//          )
-//        )
-
         val request =
           FakeRequest(
             POST,
