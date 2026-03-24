@@ -69,12 +69,9 @@ class FIManagementController @Inject() (
               InternalServerError("Json Validation Failed")
             },
           validReq =>
-            service.createOrUpdateFI(validReq).map {
-              case Right(response) => Ok(response)
-              case Left(CreateSubmissionError(value)) =>
-                logger.warn(s"CreateSubmissionError $value")
-                InternalServerError(s"CreateSubmissionError $value")
-            }
+            service
+              .createOrUpdateFI(validReq)
+              .map(convertToResult)
         )
   }
 
@@ -114,7 +111,6 @@ class FIManagementController @Inject() (
           .map(convertToResult)
     }
 
-  //TODO: below not really needed
   private def convertToResult(httpResponse: HttpResponse): Result =
     httpResponse.status match {
       case OK        => Ok(httpResponse.body)

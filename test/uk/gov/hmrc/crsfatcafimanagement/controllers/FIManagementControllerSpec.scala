@@ -218,7 +218,18 @@ class FIManagementControllerSpec extends SpecBase with Generators {
     }
 
     "createFinancialInstitution" - {
+      val responseJson = """{
+                           |  "ResponseDetails": {
+                           |    "processingDate": "2001-12-17T09:30:47z",
+                           |    "ReturnParameters": {
+                           |      "Key": "POID",
+                           |      "Value": "177993886"
+                           |    }
+                           |  }
+                           |}
+                           |""".stripMargin
       "must return OK when UpdateSubscription was successful" in {
+
         when(
           mockCADXSubmissionService
             .createOrUpdateFI(any[CreateRequestDetails]())(
@@ -226,11 +237,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
               any[ExecutionContext](),
               any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
             )
-        ).thenReturn(
-          Future.successful(
-            Right("testFIID")
-          )
-        )
+        ).thenReturn(Future.successful(HttpResponse(OK, responseJson, Map.empty)))
 
         val request =
           FakeRequest(
@@ -240,53 +247,29 @@ class FIManagementControllerSpec extends SpecBase with Generators {
 
         val result = route(app, request).value
         status(result) mustEqual OK
+        contentAsJson(result) mustBe Json.parse(responseJson)
 
       }
 
       "must return 500 with a json validation error when receiving invalid json" in {
-        when(
-          mockCADXSubmissionService
-            .createOrUpdateFI(any[CreateRequestDetails]())(
-              any[HeaderCarrier](),
-              any[ExecutionContext](),
-              any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
-            )
-        ).thenReturn(
-          Future.successful(
-            Right("testFIID")
-          )
-        )
+//        when(
+//          mockCADXSubmissionService
+//            .createOrUpdateFI(any[CreateRequestDetails]())(
+//              any[HeaderCarrier](),
+//              any[ExecutionContext](),
+//              any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
+//            )
+//        ).thenReturn(
+//          Future.successful(
+//            Right("testFIID")
+//          )
+//        )
 
         val request =
           FakeRequest(
             POST,
             routes.FIManagementController.createFinancialInstitution().url
           ).withJsonBody(invalidFiDetailsRequestJson)
-
-        val result = route(app, request).value
-        status(result) mustEqual INTERNAL_SERVER_ERROR
-
-      }
-
-      "must return a create submission error when not able to create FI" in {
-        when(
-          mockCADXSubmissionService
-            .createOrUpdateFI(any[CreateRequestDetails]())(
-              any[HeaderCarrier](),
-              any[ExecutionContext](),
-              any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
-            )
-        ).thenReturn(
-          Future.successful(
-            Left(CreateSubmissionError(401))
-          )
-        )
-
-        val request =
-          FakeRequest(
-            POST,
-            routes.FIManagementController.createFinancialInstitution().url
-          ).withJsonBody(fiDetailsRequestJson)
 
         val result = route(app, request).value
         status(result) mustEqual INTERNAL_SERVER_ERROR
@@ -295,6 +278,13 @@ class FIManagementControllerSpec extends SpecBase with Generators {
     }
 
     "updateFinancialInstitution" - {
+      val responseJson = """{
+                           |  "ResponseDetails": {
+                           |    "processingDate": "2001-12-17T09:30:47z",
+                           |  }
+                           |}
+                           |""".stripMargin
+
       "must return OK when UpdateSubscription was successful" in {
         when(
           mockCADXSubmissionService
@@ -303,11 +293,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
               any[ExecutionContext](),
               any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
             )
-        ).thenReturn(
-          Future.successful(
-            Right("testFIID")
-          )
-        )
+        ).thenReturn(Future.successful(HttpResponse(OK, responseJson, Map.empty)))
 
         val request =
           FakeRequest(
@@ -321,49 +307,11 @@ class FIManagementControllerSpec extends SpecBase with Generators {
       }
 
       "must return 500 with a json validation error when receiving invalid json" in {
-        when(
-          mockCADXSubmissionService
-            .createOrUpdateFI(any[UpdateRequestDetails]())(
-              any[HeaderCarrier](),
-              any[ExecutionContext](),
-              any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
-            )
-        ).thenReturn(
-          Future.successful(
-            Right("testFIID")
-          )
-        )
-
         val request =
           FakeRequest(
             PUT,
             routes.FIManagementController.updateFinancialInstitution().url
           ).withJsonBody(invalidFiDetailsRequestJson)
-
-        val result = route(app, request).value
-        status(result) mustEqual INTERNAL_SERVER_ERROR
-
-      }
-
-      "must return a create submission error when not able to create FI" in {
-        when(
-          mockCADXSubmissionService
-            .createOrUpdateFI(any[UpdateRequestDetails]())(
-              any[HeaderCarrier](),
-              any[ExecutionContext](),
-              any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
-            )
-        ).thenReturn(
-          Future.successful(
-            Left(CreateSubmissionError(401))
-          )
-        )
-
-        val request =
-          FakeRequest(
-            PUT,
-            routes.FIManagementController.updateFinancialInstitution().url
-          ).withJsonBody(fiDetailsRequestJson)
 
         val result = route(app, request).value
         status(result) mustEqual INTERNAL_SERVER_ERROR

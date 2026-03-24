@@ -18,7 +18,7 @@ package uk.gov.hmrc.crsfatcafimanagement.models
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class FIDetail( //TODO: model doesnt match spec
+final case class FIDetail(
   FIID: String,
   FIName: String,
   SubscriptionID: String,

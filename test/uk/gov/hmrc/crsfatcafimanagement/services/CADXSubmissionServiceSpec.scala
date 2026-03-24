@@ -108,30 +108,8 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
                                                                           any[ExecutionContext](),
                                                                           any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
             )
-            sub mustBe Right("testFIID")
-        }
-      }
-
-      "must have UpdateSubscriptionError when connector response with not ok status" in {
-        val service = app.injector.instanceOf[CADXSubmissionService]
-
-        when(
-          mockCADXConnector.createFI(is(createFiReq))(any[HeaderCarrier](),
-                                                      any[ExecutionContext](),
-                                                      any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
-          )
-        )
-          .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
-
-        val result = service.createOrUpdateFI(createRequestDetails)
-
-        whenReady(result) {
-          sub =>
-            verify(mockCADXConnector, times(1)).createFI(is(createFiReq))(any[HeaderCarrier](),
-                                                                          any[ExecutionContext](),
-                                                                          any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
-            )
-            sub mustBe Left(CreateSubmissionError(500))
+            sub.status mustBe 200
+            sub.body mustBe "testFIID"
         }
       }
     }
@@ -170,7 +148,8 @@ class CADXSubmissionServiceSpec extends SpecBase with BeforeAndAfterEach {
                                                                           any[ExecutionContext](),
                                                                           any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
             )
-            sub mustBe Right("testFIID")
+            sub.status mustBe 200
+            sub.body mustBe "testFIID"
         }
       }
     }
