@@ -18,7 +18,7 @@ package uk.gov.hmrc.crsfatcafimanagement.models.error
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class ErrorDetails(ErrorDetail: ErrorDetail) //TODO: Not in the spec - remove
+final case class ErrorDetails(ErrorDetail: ErrorDetail)
 
 object ErrorDetails {
   implicit val format: OFormat[ErrorDetails] = Json.format[ErrorDetails]
