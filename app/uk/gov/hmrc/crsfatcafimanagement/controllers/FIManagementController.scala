@@ -69,12 +69,9 @@ class FIManagementController @Inject() (
               InternalServerError("Json Validation Failed")
             },
           validReq =>
-            service.createOrUpdateFI(validReq).map {
-              case Right(response) => Ok(response)
-              case Left(CreateSubmissionError(value)) =>
-                logger.warn(s"CreateSubmissionError $value")
-                InternalServerError(s"CreateSubmissionError $value")
-            }
+            service
+              .createOrUpdateFI(validReq)
+              .map(convertToResult)
         )
   }
 
@@ -142,7 +139,7 @@ class FIManagementController @Inject() (
     val error = Try(Json.parse(body).validate[ErrorDetails])
     error match {
       case Success(JsSuccess(value, _)) =>
-        logger.warn(s"CADX error: ${value.ErrorDetail.SourceFaultDetail.map(_.Detail.mkString)}")
+        logger.warn(s"CADX error: ${value.ErrorDetail.sourceFaultDetail.map(_.detail.mkString)}")
       case _ =>
         logger.warn("CADX response is not a valid json")
     }

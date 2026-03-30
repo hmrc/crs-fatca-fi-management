@@ -18,7 +18,7 @@ package uk.gov.hmrc.crsfatcafimanagement.models.error
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class SourceFaultDetail(Detail: Seq[String], RestFault: Option[String], SoapFault: Option[String])
+final case class SourceFaultDetail(detail: Seq[String], RestFault: Option[String] = None, SoapFault: Option[String] = None)
 
 object SourceFaultDetail {
   implicit val format: OFormat[SourceFaultDetail] = Json.format[SourceFaultDetail]

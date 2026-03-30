@@ -24,7 +24,7 @@ import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels._
 import uk.gov.hmrc.crsfatcafimanagement.models.RequestType
 import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.DELETE
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +37,7 @@ class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging
     hc: HeaderCarrier,
     ex: ExecutionContext,
     writes: Writes[FIManagement[FIDetailsRequest[T]]]
-  ): Future[Either[CreateSubmissionError, String]] = {
+  ): Future[HttpResponse] = {
     val requestType = requestDetails match {
       case _: CreateRequestDetails => RequestType.CREATE
       case _: UpdateRequestDetails => RequestType.UPDATE
@@ -50,15 +50,7 @@ class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging
       RequestParameters = List.empty
     )
     val request: FIManagement[FIDetailsRequest[T]] = FIManagement(FIDetailsRequest(reqCommon, requestDetails))
-    connector.createFI(request).map {
-      res =>
-        res.status match {
-          case OK => Right(res.body)
-          case status =>
-            logger.warn(s"create submission Got Status $status")
-            Left(CreateSubmissionError(status))
-        }
-    }
+    connector.createFI(request)
   }
 
   def removeFI(
