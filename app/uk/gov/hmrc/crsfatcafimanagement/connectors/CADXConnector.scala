@@ -21,6 +21,7 @@ import uk.gov.hmrc.crsfatcafimanagement.config.AppConfig
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{FIDetailsRequest, FIManagement, RemoveFIDetailsRequest, RequestDetails}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HeaderNames, HttpReads, HttpResponse, StringContextOps}
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 
 import java.net.URL
 import java.time.{ZoneId, ZonedDateTime}
