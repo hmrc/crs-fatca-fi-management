@@ -27,7 +27,7 @@ class TINTypeSpec extends AnyWordSpec with Matchers {
       Json.fromJson[TINType](JsString("UTR")) shouldBe JsSuccess(TINType.UTR)
       Json.fromJson[TINType](JsString("CRN")) shouldBe JsSuccess(TINType.CRN)
       Json.fromJson[TINType](JsString("TURN")) shouldBe JsSuccess(TINType.TURN)
-      Json.fromJson[TINType](JsString("Other")) shouldBe JsSuccess(TINType.Other)
+      Json.fromJson[TINType](JsString("OTHER")) shouldBe JsSuccess(TINType.OTHER)
     }
 
     "reject an unknown string with a JsError" in {
@@ -46,7 +46,7 @@ class TINTypeSpec extends AnyWordSpec with Matchers {
       Json.toJson[TINType](TINType.UTR) shouldBe JsString("UTR")
       Json.toJson[TINType](TINType.CRN) shouldBe JsString("CRN")
       Json.toJson[TINType](TINType.TURN) shouldBe JsString("TURN")
-      Json.toJson[TINType](TINType.Other) shouldBe JsString("Other")
+      Json.toJson[TINType](TINType.OTHER) shouldBe JsString("OTHER")
     }
 
     "have values unchanged when toJson then fromJson" in {

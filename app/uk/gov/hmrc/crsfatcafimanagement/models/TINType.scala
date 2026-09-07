@@ -25,9 +25,9 @@ object TINType {
   case object UTR extends TINType
   case object CRN extends TINType
   case object TURN extends TINType
-  case object Other extends TINType
+  case object OTHER extends TINType
 
-  val allValues: Seq[TINType] = Seq(UTR, CRN, TURN, Other)
+  val allValues: Seq[TINType] = Seq(UTR, CRN, TURN, OTHER)
 
   private val stringMapping: Map[String, TINType] = allValues
     .map(
