@@ -26,7 +26,7 @@ import play.api.libs.json.Json
 import play.api.{Application, Configuration}
 import uk.gov.hmrc.crsfatcafimanagement.SpecBase
 import uk.gov.hmrc.crsfatcafimanagement.generators.Generators
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateRequestDetails, FIDetailsRequest, FIManagement, RemoveFIDetailsRequest, RequestCommon}
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateRequestDetails, FIDetailsRequest, FIManagement, RequestCommon}
 import uk.gov.hmrc.crsfatcafimanagement.models.{FIDetail, ViewFIDetailsResponse}
 import uk.gov.hmrc.crsfatcafimanagement.wiremock.WireMockHelper
 
@@ -174,21 +174,6 @@ class CADXConnectorSpec extends SpecBase with Generators with IntegrationPatienc
             val result = connector.createFI(FIManagement(FIDetailsRequest(common, request))).futureValue
             result.status mustBe OK
             Json.parse(result.body).as[FIDetail] mustBe fiDetail
-        }
-      }
-    }
-
-    "removeFI" - {
-      "must return status OK when creating an FI" in {
-        forAll(arbitrary[RemoveFIDetailsRequest]) {
-          request =>
-            stubResponse(
-              url = "/dac6/dct139a/v1",
-              statusCode = OK
-            )
-
-            val result = connector.removeFI(FIManagement(request)).futureValue
-            result.status mustBe OK
         }
       }
     }

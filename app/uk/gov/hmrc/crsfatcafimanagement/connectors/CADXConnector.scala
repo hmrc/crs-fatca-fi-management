@@ -21,7 +21,6 @@ import uk.gov.hmrc.crsfatcafimanagement.config.AppConfig
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{FIDetailsRequest, FIManagement, RemoveFIDetailsRequest, RequestDetails}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HeaderNames, HttpReads, HttpResponse, StringContextOps}
-import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 
 import java.net.URL
 import java.time.{ZoneId, ZonedDateTime}
@@ -86,17 +85,22 @@ class CADXConnector @Inject() (
 
   private[connectors] def addHeaders(eisEnvironment: String)(implicit headerCarrier: HeaderCarrier): Seq[(String, String)] = {
     // HTTP-date format defined by RFC 7231 e.g. Fri, 01 Aug 2020 15:51:38 UTC
-    val formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'UTC'").withZone(ZoneId.of("UTC"))
+    val formatter                      = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'UTC'").withZone(ZoneId.of("UTC"))
+    val stripSession: String => String = (input: String) => input.replace("session-", "")
 
     Seq(
-      "x-forwarded-host"  -> "mdtp",
-      "date"              -> ZonedDateTime.now().format(formatter),
-      "x-correlation-id"  -> UUID.randomUUID().toString,
-      "x-conversation-id" -> UUID.randomUUID().toString,
-      "x-regime-type"     -> "CRSFATCA",
-      "content-type"      -> "application/json",
-      "accept"            -> "application/json",
-      "Environment"       -> eisEnvironment
+      "x-forwarded-host" -> "mdtp",
+      "date"             -> ZonedDateTime.now().format(formatter),
+      "x-correlation-id" -> UUID.randomUUID().toString,
+      "x-conversation-id" -> headerCarrier.sessionId
+        .map(
+          id => stripSession(id.value)
+        )
+        .getOrElse(UUID.randomUUID().toString),
+      "x-regime-type" -> "CRSFATCA",
+      "content-type"  -> "application/json",
+      "accept"        -> "application/json",
+      "Environment"   -> eisEnvironment
     )
   }
 

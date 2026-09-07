@@ -322,7 +322,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
         val request =
           FakeRequest(
             POST,
-            routes.FIManagementController.removeFinancialInstitution().url
+            routes.FIManagementController.removeFinancialInstitution.url
           ).withJsonBody(removeFiDetailsRequestJson)
 
         val result = route(app, request).value
@@ -333,7 +333,7 @@ class FIManagementControllerSpec extends SpecBase with Generators {
         val request =
           FakeRequest(
             POST,
-            routes.FIManagementController.removeFinancialInstitution().url
+            routes.FIManagementController.removeFinancialInstitution.url
           ).withJsonBody(invalidFiDetailsRequestJson)
 
         val result = route(app, request).value
