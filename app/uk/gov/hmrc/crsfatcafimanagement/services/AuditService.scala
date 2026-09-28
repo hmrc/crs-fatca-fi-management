@@ -18,7 +18,9 @@ package uk.gov.hmrc.crsfatcafimanagement.services
 
 import play.api.Logger
 import play.api.libs.json.OWrites
-import uk.gov.hmrc.crsfatcafimanagement.models.audit.{AuditEvent, RemoveFinancialInstitution}
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.CreateRequestDetails
+import uk.gov.hmrc.crsfatcafimanagement.models.TINType
+import uk.gov.hmrc.crsfatcafimanagement.models.audit.{AddFinancialInstitution, AuditEvent, RemoveFinancialInstitution}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.DefaultAuditConnector
 
@@ -31,6 +33,53 @@ class AuditService @Inject() (
 )(implicit ec: ExecutionContext) {
 
   private val logger: Logger = Logger(this.getClass)
+
+  def sendAddFinancialInstitution(
+    request: CreateRequestDetails,
+    financialInstitutionId: String
+  )(implicit hc: HeaderCarrier): Unit = {
+
+    val event = AddFinancialInstitution(
+      fatcaId = request.SubscriptionID,
+      isRegisteredBusiness = request.IsFIUser,
+      financialInstitutionId = financialInstitutionId,
+      financialInstitutionName = request.FIName,
+      utr = tinValue(request, TINType.UTR),
+      crn = tinValue(request, TINType.CRN),
+      urn = tinValue(request, TINType.TURN),
+      giin = request.GIIN,
+      addressLine1 = request.AddressDetails.AddressLine1,
+      addressLine2 = nonEmpty(request.AddressDetails.AddressLine2),
+      city = nonEmpty(request.AddressDetails.AddressLine3),
+      county = nonEmpty(request.AddressDetails.AddressLine4),
+      postcode = nonEmpty(request.AddressDetails.PostalCode),
+      country = nonEmpty(request.AddressDetails.CountryCode),
+      uprn = None,
+      primaryContactName = request.PrimaryContactDetails.flatMap(
+        contact => nonEmpty(contact.ContactName)
+      ),
+      primaryContactEmail = request.PrimaryContactDetails.flatMap(
+        contact => nonEmpty(contact.EmailAddress)
+      ),
+      primaryContactTelephone = request.PrimaryContactDetails.flatMap(
+        contact => nonEmpty(contact.PhoneNumber)
+      ),
+      secondaryContactName = request.SecondaryContactDetails.flatMap(
+        contact => nonEmpty(contact.ContactName)
+      ),
+      secondaryContactEmail = request.SecondaryContactDetails.flatMap(
+        contact => nonEmpty(contact.EmailAddress)
+      ),
+      secondaryContactTelephone = request.SecondaryContactDetails.flatMap(
+        contact => nonEmpty(contact.PhoneNumber)
+      )
+    )
+
+    send(
+      auditType = "AddFinancialInstitution",
+      event = event
+    )
+  }
 
   def sendRemoveFinancialInstitution(
     financialInstitutionId: String,
@@ -47,6 +96,21 @@ class AuditService @Inject() (
       event = event
     )
   }
+
+  private def tinValue(
+    request: CreateRequestDetails,
+    tinType: TINType
+  ): Option[String] =
+    request.TINDetails.collectFirst {
+      case tin if tin.TINType == tinType =>
+        tin.TIN
+    }
+
+  private def nonEmpty(value: String): Option[String] =
+    Option(value).filter(_.trim.nonEmpty)
+
+  private def nonEmpty(value: Option[String]): Option[String] =
+    value.filter(_.trim.nonEmpty)
 
   private def send[E <: AuditEvent](
     auditType: String,

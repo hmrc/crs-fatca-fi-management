@@ -370,19 +370,53 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
 
     "createFinancialInstitution" - {
 
-      val responseJson =
-        """{
-          |  "ResponseDetails": {
-          |    "processingDate": "2001-12-17T09:30:47z",
-          |    "ReturnParameters": {
-          |      "Key": "POID",
-          |      "Value": "177993886"
-          |    }
-          |  }
-          |}
-          |""".stripMargin
+      "must return OK and send the correct audit event when create was successful" in {
 
-      "must return OK when UpdateSubscription was successful" in {
+        forAll(arbitrary[FIDetail]) {
+          fiDetail =>
+            when(
+              mockCADXSubmissionService
+                .createOrUpdateFI(
+                  any[CreateRequestDetails]()
+                )(
+                  any[HeaderCarrier](),
+                  any[ExecutionContext](),
+                  any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
+                )
+            ).thenReturn(
+              Future.successful(
+                HttpResponse(
+                  OK,
+                  Json.toJson(fiDetail),
+                  Map.empty
+                )
+              )
+            )
+
+            val request =
+              FakeRequest(
+                POST,
+                routes.FIManagementController
+                  .createFinancialInstitution()
+                  .url
+              ).withJsonBody(fiDetailsRequestJson)
+
+            val result = route(app, request).value
+
+            status(result) mustEqual OK
+            contentAsJson(result) mustBe Json.toJson(fiDetail)
+
+            verify(mockAuditService)
+              .sendAddFinancialInstitution(
+                any[CreateRequestDetails](),
+                mockitoEq(fiDetail.FIID)
+              )(
+                any[HeaderCarrier]()
+              )
+        }
+      }
+
+      "must not send an audit event when create fails" in {
 
         when(
           mockCADXSubmissionService
@@ -396,8 +430,8 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
         ).thenReturn(
           Future.successful(
             HttpResponse(
-              OK,
-              responseJson,
+              INTERNAL_SERVER_ERROR,
+              Json.obj(),
               Map.empty
             )
           )
@@ -413,11 +447,12 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
 
         val result = route(app, request).value
 
-        status(result) mustEqual OK
-        contentAsJson(result) mustBe Json.parse(responseJson)
+        status(result) mustEqual INTERNAL_SERVER_ERROR
+
+        verifyNoInteractions(mockAuditService)
       }
 
-      "must return 500 with a json validation error when receiving invalid json" in {
+      "must return 500 with a json validation error and not send an audit event when receiving invalid json" in {
 
         val request =
           FakeRequest(
@@ -430,6 +465,8 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
         val result = route(app, request).value
 
         status(result) mustEqual INTERNAL_SERVER_ERROR
+
+        verifyNoInteractions(mockAuditService)
       }
     }
 
@@ -475,6 +512,8 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
         val result = route(app, request).value
 
         status(result) mustEqual OK
+
+        verifyNoInteractions(mockAuditService)
       }
 
       "must return 500 with a json validation error when receiving invalid json" in {

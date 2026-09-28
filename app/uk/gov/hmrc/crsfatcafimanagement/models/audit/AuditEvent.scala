@@ -31,3 +31,34 @@ object RemoveFinancialInstitution {
     Json.format[RemoveFinancialInstitution]
 
 }
+
+final case class AddFinancialInstitution(
+  fatcaId: String,
+  isRegisteredBusiness: Boolean,
+  financialInstitutionId: String,
+  financialInstitutionName: String,
+  utr: Option[String],
+  crn: Option[String],
+  urn: Option[String],
+  giin: Option[String],
+  addressLine1: String,
+  addressLine2: Option[String],
+  city: Option[String],
+  county: Option[String],
+  postcode: Option[String],
+  country: Option[String],
+  uprn: Option[String],
+  primaryContactName: Option[String],
+  primaryContactEmail: Option[String],
+  primaryContactTelephone: Option[String],
+  secondaryContactName: Option[String],
+  secondaryContactEmail: Option[String],
+  secondaryContactTelephone: Option[String]
+) extends AuditEvent
+
+object AddFinancialInstitution {
+
+  implicit val format: OFormat[AddFinancialInstitution] =
+    Json.format[AddFinancialInstitution]
+
+}

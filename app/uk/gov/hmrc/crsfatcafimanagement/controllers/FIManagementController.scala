@@ -24,7 +24,7 @@ import uk.gov.hmrc.crsfatcafimanagement.auth.AuthActionSets
 import uk.gov.hmrc.crsfatcafimanagement.config.AppConfig
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
 import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateRequestDetails, RemoveRequestDetails, RequestDetails, UpdateRequestDetails}
-import uk.gov.hmrc.crsfatcafimanagement.models.RequestType
+import uk.gov.hmrc.crsfatcafimanagement.models.{FIDetail, RequestType}
 import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.{CREATE, UPDATE}
 import uk.gov.hmrc.crsfatcafimanagement.models.error.ErrorDetails
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
@@ -46,59 +46,108 @@ class FIManagementController @Inject() (
     extends BackendController(controllerComponents)
     with Logging {
 
-  def createFinancialInstitution(): Action[JsValue] = submitFinancialInstitutions(CREATE)
+  def createFinancialInstitution(): Action[JsValue] =
+    submitFinancialInstitutions(CREATE)
 
-  def updateFinancialInstitution(): Action[JsValue] = submitFinancialInstitutions(UPDATE)
+  def updateFinancialInstitution(): Action[JsValue] =
+    submitFinancialInstitutions(UPDATE)
 
-  private def submitFinancialInstitutions(requestType: RequestType): Action[JsValue] = authenticator.authenticateAll.async(parse.json) {
-    implicit request =>
-      def stripType(json: JsValue): JsValue = json match {
-        case obj: JsObject => obj - "_type"
-        case other         => other
-      }
-      val sanitizedBody = stripType(request.body)
-      val validated: JsResult[RequestDetails] = requestType match {
-        case CREATE => sanitizedBody.validate[CreateRequestDetails]
-        case UPDATE => sanitizedBody.validate[UpdateRequestDetails]
-        case _      => JsError(s"Unsupported requestType: $requestType")
-      }
-      validated
-        .fold(
+  private def submitFinancialInstitutions(
+    requestType: RequestType
+  ): Action[JsValue] =
+    authenticator.authenticateAll.async(parse.json) {
+      implicit request =>
+        def stripType(json: JsValue): JsValue =
+          json match {
+            case obj: JsObject => obj - "_type"
+            case other         => other
+          }
+
+        val sanitizedBody = stripType(request.body)
+
+        val validated: JsResult[RequestDetails] =
+          requestType match {
+            case CREATE =>
+              sanitizedBody.validate[CreateRequestDetails]
+
+            case UPDATE =>
+              sanitizedBody.validate[UpdateRequestDetails]
+
+            case _ =>
+              JsError(s"Unsupported requestType: $requestType")
+          }
+
+        validated.fold(
           invalid =>
             Future.successful {
-              logger.warn(s" createSubmission Json Validation Failed: $invalid")
+              logger.warn(
+                s"createSubmission Json Validation Failed: $invalid"
+              )
               InternalServerError("Json Validation Failed")
             },
           validReq =>
             service
               .createOrUpdateFI(validReq)
-              .map(convertToResult)
-        )
-  }
+              .map {
+                response =>
+                  if (response.status == OK) {
+                    validReq match {
+                      case createRequest: CreateRequestDetails =>
+                        extractFinancialInstitutionId(response) match {
+                          case Some(financialInstitutionId) =>
+                            auditService.sendAddFinancialInstitution(
+                              request = createRequest,
+                              financialInstitutionId = financialInstitutionId
+                            )
+                          case None =>
+                            logger.warn(
+                              "Unable to send AddFinancialInstitution audit event: " +
+                                "FIID not found in create response"
+                            )
+                        }
 
-  def removeFinancialInstitution(): Action[JsValue] = authenticator.authenticateAll.async(parse.json) {
-    implicit request =>
-      request.body
-        .validate[RemoveRequestDetails]
-        .fold(
-          invalid =>
-            Future.successful {
-              logger.warn(s" removeFinancialInstitution Json Validation Failed: $invalid")
-              InternalServerError("Json Validation Failed")
-            },
-          validReq =>
-            service.removeFI(validReq).map {
-              case Right(_) =>
-                auditService.sendRemoveFinancialInstitution(validReq.FIID, validReq.SubscriptionID)
-                Ok
-              case Left(CreateSubmissionError(value)) =>
-                logger.warn(s"CreateSubmissionError $value")
-                InternalServerError(s"CreateSubmissionError $value")
-            }
-        )
-  }
+                      case updateFiRequest: UpdateRequestDetails =>
+                        // TODO: Send AmendFinancialInstitution audit event here when implemented.
+                        ()
+                    }
+                  }
 
-  def listFinancialInstitutions(subscriptionId: String): Action[AnyContent] =
+                  convertToResult(response)
+              }
+        )
+    }
+
+  def removeFinancialInstitution(): Action[JsValue] =
+    authenticator.authenticateAll.async(parse.json) {
+      implicit request =>
+        request.body
+          .validate[RemoveRequestDetails]
+          .fold(
+            invalid =>
+              Future.successful {
+                logger.warn(
+                  s"removeFinancialInstitution Json Validation Failed: $invalid"
+                )
+                InternalServerError("Json Validation Failed")
+              },
+            validReq =>
+              service.removeFI(validReq).map {
+                case Right(_) =>
+                  auditService.sendRemoveFinancialInstitution(
+                    validReq.FIID,
+                    validReq.SubscriptionID
+                  )
+                  Ok
+                case Left(CreateSubmissionError(value)) =>
+                  logger.warn(s"CreateSubmissionError $value")
+                  InternalServerError(s"CreateSubmissionError $value")
+              }
+          )
+    }
+
+  def listFinancialInstitutions(
+    subscriptionId: String
+  ): Action[AnyContent] =
     authenticator.authenticateAll.async {
       implicit request =>
         connector
@@ -106,7 +155,10 @@ class FIManagementController @Inject() (
           .map(convertToResult)
     }
 
-  def viewFinancialInstitution(subscriptionId: String, fiId: String): Action[AnyContent] =
+  def viewFinancialInstitution(
+    subscriptionId: String,
+    fiId: String
+  ): Action[AnyContent] =
     authenticator.authenticateAll.async {
       implicit request =>
         connector
@@ -114,35 +166,60 @@ class FIManagementController @Inject() (
           .map(convertToResult)
     }
 
-  private def convertToResult(httpResponse: HttpResponse): Result =
+  private def extractFinancialInstitutionId(
+    response: HttpResponse
+  ): Option[String] =
+    Try(Json.parse(response.body)).toOption
+      .flatMap(
+        _.validate[FIDetail].asOpt
+          .map(_.FIID)
+      )
+
+  private def convertToResult(
+    httpResponse: HttpResponse
+  ): Result =
     httpResponse.status match {
-      case OK        => Ok(httpResponse.body)
-      case NOT_FOUND => NotFound(httpResponse.body)
+      case OK =>
+        Ok(httpResponse.body)
+
+      case NOT_FOUND =>
+        NotFound(httpResponse.body)
+
       case UNPROCESSABLE_ENTITY =>
         logDownStreamError(httpResponse.body)
         UnprocessableEntity(httpResponse.body)
+
       case BAD_REQUEST =>
         logDownStreamError(httpResponse.body)
         BadRequest(httpResponse.body)
+
       case FORBIDDEN =>
         logDownStreamError(httpResponse.body)
         Forbidden(httpResponse.body)
+
       case SERVICE_UNAVAILABLE =>
         logDownStreamError(httpResponse.body)
         ServiceUnavailable(httpResponse.body)
+
       case METHOD_NOT_ALLOWED =>
         logDownStreamError(httpResponse.body)
         MethodNotAllowed(httpResponse.body)
+
       case _ =>
         logDownStreamError(httpResponse.body)
         InternalServerError(httpResponse.body)
     }
 
   private def logDownStreamError(body: String): Unit = {
-    val error = Try(Json.parse(body).validate[ErrorDetails])
+    val error =
+      Try(Json.parse(body).validate[ErrorDetails])
+
     error match {
       case Success(JsSuccess(value, _)) =>
-        logger.warn(s"CADX error: ${value.ErrorDetail.sourceFaultDetail.map(_.detail.mkString)}")
+        logger.warn(
+          s"CADX error: ${value.ErrorDetail.sourceFaultDetail.map(_.detail.mkString)}"
+        )
+
       case _ =>
         logger.warn("CADX response is not a valid json")
     }
