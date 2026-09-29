@@ -17,14 +17,13 @@
 package uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels
 
 import play.api.libs.json.{Json, OWrites, Reads}
-import uk.gov.hmrc.crsfatcafimanagement.models.{AddressDetails, ContactDetails, TINDetails}
+import uk.gov.hmrc.crsfatcafimanagement.models.{AddressDetails, AddressIncAllFields, ContactDetails, TINDetails}
 
 sealed trait RequestDetails {
   val SubscriptionID: String
   val TINDetails: List[TINDetails]
   val GIIN: Option[String]
   val IsFIUser: Boolean
-  val AddressDetails: AddressDetails
   val PrimaryContactDetails: Option[ContactDetails]   = None
   val SecondaryContactDetails: Option[ContactDetails] = None
 }
@@ -54,6 +53,22 @@ object CreateRequestDetails {
   implicit val writes: OWrites[CreateRequestDetails] = Json.writes[CreateRequestDetails]
 }
 
+final case class CreateRequestDetailsAllFields(
+  FIName: String,
+  SubscriptionID: String,
+  TINDetails: List[TINDetails],
+  GIIN: Option[String],
+  IsFIUser: Boolean,
+  AddressDetails: AddressIncAllFields,
+  override val PrimaryContactDetails: Option[ContactDetails] = None,
+  override val SecondaryContactDetails: Option[ContactDetails] = None
+) extends RequestDetails
+
+object CreateRequestDetailsAllFields {
+  implicit val reads: Reads[CreateRequestDetailsAllFields]    = Json.reads[CreateRequestDetailsAllFields]
+  implicit val writes: OWrites[CreateRequestDetailsAllFields] = Json.writes[CreateRequestDetailsAllFields]
+}
+
 final case class UpdateRequestDetails(
   FIID: String,
   FIName: String,
@@ -69,6 +84,23 @@ final case class UpdateRequestDetails(
 object UpdateRequestDetails {
   implicit val reads: Reads[UpdateRequestDetails]    = Json.reads[UpdateRequestDetails]
   implicit val writes: OWrites[UpdateRequestDetails] = Json.writes[UpdateRequestDetails]
+}
+
+final case class UpdateRequestDetailsAllFields(
+  FIID: String,
+  FIName: String,
+  SubscriptionID: String,
+  TINDetails: List[TINDetails],
+  GIIN: Option[String],
+  IsFIUser: Boolean,
+  AddressDetails: AddressIncAllFields,
+  override val PrimaryContactDetails: Option[ContactDetails] = None,
+  override val SecondaryContactDetails: Option[ContactDetails] = None
+) extends RequestDetails
+
+object UpdateRequestDetailsAllFields {
+  implicit val reads: Reads[UpdateRequestDetailsAllFields]    = Json.reads[UpdateRequestDetailsAllFields]
+  implicit val writes: OWrites[UpdateRequestDetailsAllFields] = Json.writes[UpdateRequestDetailsAllFields]
 }
 
 final case class RemoveRequestDetails(

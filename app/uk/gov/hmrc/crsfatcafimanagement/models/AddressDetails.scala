@@ -24,8 +24,7 @@ final case class AddressDetails(
   AddressLine3: Option[String],
   AddressLine4: Option[String],
   CountryCode: Option[String],
-  PostalCode: Option[String],
-  uprn: Option[String]
+  PostalCode: Option[String]
 )
 
 object AddressDetails {

@@ -62,3 +62,34 @@ object AddFinancialInstitution {
     Json.format[AddFinancialInstitution]
 
 }
+
+final case class AmendFinancialInstitution(
+  fatcaId: String,
+  isRegisteredBusiness: Option[Boolean],
+  financialInstitutionId: String,
+  financialInstitutionName: Option[String],
+  utr: Option[String],
+  crn: Option[String],
+  urn: Option[String],
+  giin: Option[String],
+  addressLine1: Option[String],
+  addressLine2: Option[String],
+  city: Option[String],
+  county: Option[String],
+  postcode: Option[String],
+  country: Option[String],
+  uprn: Option[String],
+  primaryContactName: Option[String],
+  primaryContactEmail: Option[String],
+  primaryContactTelephone: Option[String],
+  secondaryContactName: Option[String],
+  secondaryContactEmail: Option[String],
+  secondaryContactTelephone: Option[String]
+) extends AuditEvent
+
+object AmendFinancialInstitution {
+
+  implicit val format: OFormat[AmendFinancialInstitution] =
+    Json.format[AmendFinancialInstitution]
+
+}

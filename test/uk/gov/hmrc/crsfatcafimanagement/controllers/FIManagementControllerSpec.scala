@@ -17,6 +17,7 @@
 package uk.gov.hmrc.crsfatcafimanagement.controllers
 
 import com.softwaremill.quicklens._
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => mockitoEq}
 import org.mockito.Mockito.{reset, verify, verifyNoInteractions}
 import org.scalacheck.Arbitrary.arbitrary
@@ -98,12 +99,43 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
       |    "EmailAddress": "jane.doe@example.com"
       |  },
       |  "AddressDetails": {
-      |    "AddressLine1": "100 Sutton Street",
-      |    "AddressLine2": "Wokingham",
-      |    "AddressLine3": "Surrey",
-      |    "AddressLine4": "London",
-      |    "PostalCode": "DH14EJ",
-      |    "CountryCode": "GB"
+      |    "addressLine1": "100 Sutton Street",
+      |    "addressLine2": "Wokingham",
+      |    "addressLine3": "Surrey",
+      |    "addressLine4": "London",
+      |    "postCode": "DH14EJ",
+      |    "country": "GB",
+      |    "uprn": 123456789
+      |  }
+      |}""".stripMargin
+  )
+
+  val fiDetailsRequestJsonWithoutUprn: JsValue = Json.parse(
+    """
+      |{
+      |  "SubscriptionID": "123456789012345",
+      |  "FIID": "FI1234567890123",
+      |  "FIName": "Financial Institution",
+      |  "TINDetails": [],
+      |  "GIIN": "TIN123456789",
+      |  "IsFIUser": false,
+      |  "PrimaryContactDetails": {
+      |    "PhoneNumber": "07123456789",
+      |    "ContactName": "John Doe",
+      |    "EmailAddress": "john.doe@example.com"
+      |  },
+      |  "SecondaryContactDetails": {
+      |    "PhoneNumber": "07876543210",
+      |    "ContactName": "Jane Doe",
+      |    "EmailAddress": "jane.doe@example.com"
+      |  },
+      |  "AddressDetails": {
+      |    "addressLine1": "100 Sutton Street",
+      |    "addressLine2": "Wokingham",
+      |    "addressLine3": "Surrey",
+      |    "addressLine4": "London",
+      |    "postCode": "DH14EJ",
+      |    "country": "GB"
       |  }
       |}""".stripMargin
   )
@@ -408,11 +440,61 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
 
             verify(mockAuditService)
               .sendAddFinancialInstitution(
-                any[CreateRequestDetails](),
+                any[CreateRequestDetailsAllFields](),
                 mockitoEq(fiDetail.FIID)
               )(
                 any[HeaderCarrier]()
               )
+        }
+      }
+
+      "must allow an address without a UPRN and pass None to the audit request" in {
+
+        forAll(arbitrary[FIDetail]) {
+          fiDetail =>
+            when(
+              mockCADXSubmissionService
+                .createOrUpdateFI(
+                  any[CreateRequestDetails]()
+                )(
+                  any[HeaderCarrier](),
+                  any[ExecutionContext](),
+                  any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
+                )
+            ).thenReturn(
+              Future.successful(
+                HttpResponse(
+                  OK,
+                  Json.toJson(fiDetail),
+                  Map.empty
+                )
+              )
+            )
+
+            val request =
+              FakeRequest(
+                POST,
+                routes.FIManagementController
+                  .createFinancialInstitution()
+                  .url
+              ).withJsonBody(fiDetailsRequestJsonWithoutUprn)
+
+            val result = route(app, request).value
+
+            status(result) mustEqual OK
+
+            val requestCaptor =
+              ArgumentCaptor.forClass(classOf[CreateRequestDetailsAllFields])
+
+            verify(mockAuditService)
+              .sendAddFinancialInstitution(
+                requestCaptor.capture(),
+                mockitoEq(fiDetail.FIID)
+              )(
+                any[HeaderCarrier]()
+              )
+
+            requestCaptor.getValue.AddressDetails.uprn mustBe None
         }
       }
 
@@ -475,12 +557,12 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
       val responseJson =
         """{
           |  "ResponseDetails": {
-          |    "processingDate": "2001-12-17T09:30:47z",
+          |    "processingDate": "2001-12-17T09:30:47z"
           |  }
           |}
           |""".stripMargin
 
-      "must return OK when UpdateSubscription was successful" in {
+      "must return OK and send the amend audit event when UpdateSubscription was successful" in {
 
         when(
           mockCADXSubmissionService
@@ -513,6 +595,93 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
 
         status(result) mustEqual OK
 
+        verify(mockAuditService)
+          .sendAmendFinancialInstitution(
+            any[UpdateRequestDetailsAllFields]()
+          )(
+            any[HeaderCarrier]()
+          )
+      }
+
+      "must allow an address without a UPRN and pass None to the amend audit request" in {
+
+        when(
+          mockCADXSubmissionService
+            .createOrUpdateFI(
+              any[UpdateRequestDetails]()
+            )(
+              any[HeaderCarrier](),
+              any[ExecutionContext](),
+              any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
+            )
+        ).thenReturn(
+          Future.successful(
+            HttpResponse(
+              OK,
+              responseJson,
+              Map.empty
+            )
+          )
+        )
+
+        val request =
+          FakeRequest(
+            PUT,
+            routes.FIManagementController
+              .updateFinancialInstitution()
+              .url
+          ).withJsonBody(fiDetailsRequestJsonWithoutUprn)
+
+        val result = route(app, request).value
+
+        status(result) mustEqual OK
+
+        val requestCaptor =
+          ArgumentCaptor.forClass(classOf[UpdateRequestDetailsAllFields])
+
+        verify(mockAuditService)
+          .sendAmendFinancialInstitution(
+            requestCaptor.capture()
+          )(
+            any[HeaderCarrier]()
+          )
+
+        requestCaptor.getValue.AddressDetails.uprn mustBe None
+      }
+
+      "must not send an audit event when update fails" in {
+
+        when(
+          mockCADXSubmissionService
+            .createOrUpdateFI(
+              any[UpdateRequestDetails]()
+            )(
+              any[HeaderCarrier](),
+              any[ExecutionContext](),
+              any[Writes[FIManagement[FIDetailsRequest[UpdateRequestDetails]]]]
+            )
+        ).thenReturn(
+          Future.successful(
+            HttpResponse(
+              INTERNAL_SERVER_ERROR,
+              Json.obj(),
+              Map.empty
+            )
+          )
+        )
+
+        val request =
+          FakeRequest(
+            PUT,
+            routes.FIManagementController
+              .updateFinancialInstitution()
+              .url
+          ).withJsonBody(fiDetailsRequestJson)
+
+        val result = route(app, request).value
+
+        status(result) mustEqual INTERNAL_SERVER_ERROR
+
         verifyNoInteractions(mockAuditService)
       }
 
@@ -529,6 +698,8 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
         val result = route(app, request).value
 
         status(result) mustEqual INTERNAL_SERVER_ERROR
+
+        verifyNoInteractions(mockAuditService)
       }
     }
 

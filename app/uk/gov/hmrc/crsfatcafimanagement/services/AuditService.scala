@@ -18,9 +18,9 @@ package uk.gov.hmrc.crsfatcafimanagement.services
 
 import play.api.Logger
 import play.api.libs.json.OWrites
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.CreateRequestDetails
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateRequestDetailsAllFields, RequestDetails, UpdateRequestDetailsAllFields}
 import uk.gov.hmrc.crsfatcafimanagement.models.TINType
-import uk.gov.hmrc.crsfatcafimanagement.models.audit.{AddFinancialInstitution, AuditEvent, RemoveFinancialInstitution}
+import uk.gov.hmrc.crsfatcafimanagement.models.audit.{AddFinancialInstitution, AmendFinancialInstitution, AuditEvent, RemoveFinancialInstitution}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.DefaultAuditConnector
 
@@ -35,7 +35,7 @@ class AuditService @Inject() (
   private val logger: Logger = Logger(this.getClass)
 
   def sendAddFinancialInstitution(
-    request: CreateRequestDetails,
+    request: CreateRequestDetailsAllFields,
     financialInstitutionId: String
   )(implicit hc: HeaderCarrier): Unit = {
 
@@ -48,13 +48,13 @@ class AuditService @Inject() (
       crn = tinValue(request, TINType.CRN),
       urn = tinValue(request, TINType.TURN),
       giin = request.GIIN,
-      addressLine1 = request.AddressDetails.AddressLine1,
-      addressLine2 = nonEmpty(request.AddressDetails.AddressLine2),
-      city = nonEmpty(request.AddressDetails.AddressLine3),
-      county = nonEmpty(request.AddressDetails.AddressLine4),
-      postcode = nonEmpty(request.AddressDetails.PostalCode),
-      country = nonEmpty(request.AddressDetails.CountryCode),
-      uprn = None,
+      addressLine1 = request.AddressDetails.addressLine1,
+      addressLine2 = nonEmpty(request.AddressDetails.addressLine2),
+      city = nonEmpty(request.AddressDetails.addressLine3),
+      county = nonEmpty(request.AddressDetails.addressLine4),
+      postcode = nonEmpty(request.AddressDetails.postCode),
+      country = nonEmpty(request.AddressDetails.country),
+      uprn = request.AddressDetails.uprn.map(_.toString),
       primaryContactName = request.PrimaryContactDetails.flatMap(
         contact => nonEmpty(contact.ContactName)
       ),
@@ -81,6 +81,52 @@ class AuditService @Inject() (
     )
   }
 
+  def sendAmendFinancialInstitution(
+    request: UpdateRequestDetailsAllFields
+  )(implicit hc: HeaderCarrier): Unit = {
+
+    val event = AmendFinancialInstitution(
+      fatcaId = request.SubscriptionID,
+      isRegisteredBusiness = Some(request.IsFIUser),
+      financialInstitutionId = request.FIID,
+      financialInstitutionName = Some(request.FIName),
+      utr = tinValue(request, TINType.UTR),
+      crn = tinValue(request, TINType.CRN),
+      urn = tinValue(request, TINType.TURN),
+      giin = request.GIIN,
+      addressLine1 = nonEmpty(request.AddressDetails.addressLine1),
+      addressLine2 = nonEmpty(request.AddressDetails.addressLine2),
+      city = nonEmpty(request.AddressDetails.addressLine3),
+      county = nonEmpty(request.AddressDetails.addressLine4),
+      postcode = nonEmpty(request.AddressDetails.postCode),
+      country = nonEmpty(request.AddressDetails.country),
+      uprn = request.AddressDetails.uprn.map(_.toString),
+      primaryContactName = request.PrimaryContactDetails.flatMap(
+        contact => nonEmpty(contact.ContactName)
+      ),
+      primaryContactEmail = request.PrimaryContactDetails.flatMap(
+        contact => nonEmpty(contact.EmailAddress)
+      ),
+      primaryContactTelephone = request.PrimaryContactDetails.flatMap(
+        contact => nonEmpty(contact.PhoneNumber)
+      ),
+      secondaryContactName = request.SecondaryContactDetails.flatMap(
+        contact => nonEmpty(contact.ContactName)
+      ),
+      secondaryContactEmail = request.SecondaryContactDetails.flatMap(
+        contact => nonEmpty(contact.EmailAddress)
+      ),
+      secondaryContactTelephone = request.SecondaryContactDetails.flatMap(
+        contact => nonEmpty(contact.PhoneNumber)
+      )
+    )
+
+    send(
+      auditType = "AmendFinancialInstitution",
+      event = event
+    )
+  }
+
   def sendRemoveFinancialInstitution(
     financialInstitutionId: String,
     fatcaId: String
@@ -98,7 +144,7 @@ class AuditService @Inject() (
   }
 
   private def tinValue(
-    request: CreateRequestDetails,
+    request: RequestDetails,
     tinType: TINType
   ): Option[String] =
     request.TINDetails.collectFirst {

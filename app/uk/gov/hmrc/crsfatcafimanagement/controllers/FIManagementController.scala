@@ -23,7 +23,14 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.crsfatcafimanagement.auth.AuthActionSets
 import uk.gov.hmrc.crsfatcafimanagement.config.AppConfig
 import uk.gov.hmrc.crsfatcafimanagement.connectors.CADXConnector
-import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{CreateRequestDetails, RemoveRequestDetails, RequestDetails, UpdateRequestDetails}
+import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{
+  CreateRequestDetails,
+  CreateRequestDetailsAllFields,
+  RemoveRequestDetails,
+  RequestDetails,
+  UpdateRequestDetails,
+  UpdateRequestDetailsAllFields
+}
 import uk.gov.hmrc.crsfatcafimanagement.models.{FIDetail, RequestType}
 import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.{CREATE, UPDATE}
 import uk.gov.hmrc.crsfatcafimanagement.models.error.ErrorDetails
@@ -68,10 +75,10 @@ class FIManagementController @Inject() (
         val validated: JsResult[RequestDetails] =
           requestType match {
             case CREATE =>
-              sanitizedBody.validate[CreateRequestDetails]
+              sanitizedBody.validate[CreateRequestDetailsAllFields]
 
             case UPDATE =>
-              sanitizedBody.validate[UpdateRequestDetails]
+              sanitizedBody.validate[UpdateRequestDetailsAllFields]
 
             case _ =>
               JsError(s"Unsupported requestType: $requestType")
@@ -85,14 +92,16 @@ class FIManagementController @Inject() (
               )
               InternalServerError("Json Validation Failed")
             },
-          validReq =>
+          validReq => {
+            val cadxRequest = toCadxRequest(validReq)
+
             service
-              .createOrUpdateFI(validReq)
+              .createOrUpdateFI(cadxRequest)
               .map {
                 response =>
                   if (response.status == OK) {
                     validReq match {
-                      case createRequest: CreateRequestDetails =>
+                      case createRequest: CreateRequestDetailsAllFields =>
                         extractFinancialInstitutionId(response) match {
                           case Some(financialInstitutionId) =>
                             auditService.sendAddFinancialInstitution(
@@ -106,14 +115,17 @@ class FIManagementController @Inject() (
                             )
                         }
 
-                      case updateFiRequest: UpdateRequestDetails =>
-                        // TODO: Send AmendFinancialInstitution audit event here when implemented.
+                      case updateRequest: UpdateRequestDetailsAllFields =>
+                        auditService.sendAmendFinancialInstitution(updateRequest)
+
+                      case _ =>
                         ()
                     }
                   }
 
                   convertToResult(response)
               }
+          }
         )
     }
 
@@ -224,5 +236,38 @@ class FIManagementController @Inject() (
         logger.warn("CADX response is not a valid json")
     }
   }
+
+  private def toCadxRequest(
+    request: RequestDetails
+  ): RequestDetails =
+    request match {
+      case createRequest: CreateRequestDetailsAllFields =>
+        CreateRequestDetails(
+          FIName = createRequest.FIName,
+          SubscriptionID = createRequest.SubscriptionID,
+          TINDetails = createRequest.TINDetails,
+          GIIN = createRequest.GIIN,
+          IsFIUser = createRequest.IsFIUser,
+          AddressDetails = createRequest.AddressDetails.toAddressDetails,
+          PrimaryContactDetails = createRequest.PrimaryContactDetails,
+          SecondaryContactDetails = createRequest.SecondaryContactDetails
+        )
+
+      case updateRequest: UpdateRequestDetailsAllFields =>
+        UpdateRequestDetails(
+          FIID = updateRequest.FIID,
+          FIName = updateRequest.FIName,
+          SubscriptionID = updateRequest.SubscriptionID,
+          TINDetails = updateRequest.TINDetails,
+          GIIN = updateRequest.GIIN,
+          IsFIUser = updateRequest.IsFIUser,
+          AddressDetails = updateRequest.AddressDetails.toAddressDetails,
+          PrimaryContactDetails = updateRequest.PrimaryContactDetails,
+          SecondaryContactDetails = updateRequest.SecondaryContactDetails
+        )
+
+      case request =>
+        request
+    }
 
 }
