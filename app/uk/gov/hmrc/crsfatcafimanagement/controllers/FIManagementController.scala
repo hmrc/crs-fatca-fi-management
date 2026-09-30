@@ -182,10 +182,23 @@ class FIManagementController @Inject() (
     response: HttpResponse
   ): Option[String] =
     Try(Json.parse(response.body)).toOption
-      .flatMap(
-        _.validate[FIDetail].asOpt
-          .map(_.FIID)
-      )
+      .flatMap {
+        json =>
+          val returnParameters =
+            json \ "ResponseDetails" \ "ReturnParameters"
+
+          val key =
+            (returnParameters \ "Key").asOpt[String]
+
+          val value =
+            (returnParameters \ "Value").asOpt[String]
+
+          if (key.contains("POID")) {
+            value
+          } else {
+            None
+          }
+      }
 
   private def convertToResult(
     httpResponse: HttpResponse

@@ -146,6 +146,30 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
       |}""".stripMargin
   )
 
+  val financialInstitutionId = "TES682667691"
+
+  val createResponseJson: JsValue = Json.parse(
+    s"""
+       |{
+       |  "ResponseDetails": {
+       |    "processingDate": "2001-12-17T09:30:47z",
+       |    "ReturnParameters": {
+       |      "Key": "POID",
+       |      "Value": "$financialInstitutionId"
+       |    }
+       |  }
+       |}""".stripMargin
+  )
+
+  val createResponseWithoutPoidJson: JsValue = Json.parse(
+    """
+      |{
+      |  "ResponseDetails": {
+      |    "processingDate": "2001-12-17T09:30:47z"
+      |  }
+      |}""".stripMargin
+  )
+
   "FIManagementController" - {
 
     "listFinancialInstitutions" - {
@@ -404,98 +428,129 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
 
       "must return OK and send the correct audit event when create was successful" in {
 
-        forAll(arbitrary[FIDetail]) {
-          fiDetail =>
-            when(
-              mockCADXSubmissionService
-                .createOrUpdateFI(
-                  any[CreateRequestDetails]()
-                )(
-                  any[HeaderCarrier](),
-                  any[ExecutionContext](),
-                  any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
-                )
-            ).thenReturn(
-              Future.successful(
-                HttpResponse(
-                  OK,
-                  Json.toJson(fiDetail),
-                  Map.empty
-                )
-              )
+        when(
+          mockCADXSubmissionService
+            .createOrUpdateFI(
+              any[CreateRequestDetails]()
+            )(
+              any[HeaderCarrier](),
+              any[ExecutionContext](),
+              any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
             )
+        ).thenReturn(
+          Future.successful(
+            HttpResponse(
+              OK,
+              createResponseJson,
+              Map.empty
+            )
+          )
+        )
 
-            val request =
-              FakeRequest(
-                POST,
-                routes.FIManagementController
-                  .createFinancialInstitution()
-                  .url
-              ).withJsonBody(fiDetailsRequestJson)
+        val request =
+          FakeRequest(
+            POST,
+            routes.FIManagementController
+              .createFinancialInstitution()
+              .url
+          ).withJsonBody(fiDetailsRequestJson)
 
-            val result = route(app, request).value
+        val result = route(app, request).value
 
-            status(result) mustEqual OK
-            contentAsJson(result) mustBe Json.toJson(fiDetail)
+        status(result) mustEqual OK
+        contentAsJson(result) mustBe createResponseJson
 
-            verify(mockAuditService)
-              .sendAddFinancialInstitution(
-                any[CreateRequestDetailsAllFields](),
-                mockitoEq(fiDetail.FIID)
-              )(
-                any[HeaderCarrier]()
-              )
-        }
+        verify(mockAuditService)
+          .sendAddFinancialInstitution(
+            any[CreateRequestDetailsAllFields](),
+            mockitoEq(financialInstitutionId)
+          )(
+            any[HeaderCarrier]()
+          )
       }
 
       "must allow an address without a UPRN and pass None to the audit request" in {
 
-        forAll(arbitrary[FIDetail]) {
-          fiDetail =>
-            when(
-              mockCADXSubmissionService
-                .createOrUpdateFI(
-                  any[CreateRequestDetails]()
-                )(
-                  any[HeaderCarrier](),
-                  any[ExecutionContext](),
-                  any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
-                )
-            ).thenReturn(
-              Future.successful(
-                HttpResponse(
-                  OK,
-                  Json.toJson(fiDetail),
-                  Map.empty
-                )
-              )
+        when(
+          mockCADXSubmissionService
+            .createOrUpdateFI(
+              any[CreateRequestDetails]()
+            )(
+              any[HeaderCarrier](),
+              any[ExecutionContext](),
+              any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
             )
+        ).thenReturn(
+          Future.successful(
+            HttpResponse(
+              OK,
+              createResponseJson,
+              Map.empty
+            )
+          )
+        )
 
-            val request =
-              FakeRequest(
-                POST,
-                routes.FIManagementController
-                  .createFinancialInstitution()
-                  .url
-              ).withJsonBody(fiDetailsRequestJsonWithoutUprn)
+        val request =
+          FakeRequest(
+            POST,
+            routes.FIManagementController
+              .createFinancialInstitution()
+              .url
+          ).withJsonBody(fiDetailsRequestJsonWithoutUprn)
 
-            val result = route(app, request).value
+        val result = route(app, request).value
 
-            status(result) mustEqual OK
+        status(result) mustEqual OK
 
-            val requestCaptor =
-              ArgumentCaptor.forClass(classOf[CreateRequestDetailsAllFields])
+        val requestCaptor =
+          ArgumentCaptor.forClass(classOf[CreateRequestDetailsAllFields])
 
-            verify(mockAuditService)
-              .sendAddFinancialInstitution(
-                requestCaptor.capture(),
-                mockitoEq(fiDetail.FIID)
-              )(
-                any[HeaderCarrier]()
-              )
+        verify(mockAuditService)
+          .sendAddFinancialInstitution(
+            requestCaptor.capture(),
+            mockitoEq(financialInstitutionId)
+          )(
+            any[HeaderCarrier]()
+          )
 
-            requestCaptor.getValue.AddressDetails.uprn mustBe None
-        }
+        requestCaptor.getValue.AddressDetails.uprn mustBe None
+      }
+
+      "must not send an audit event when create succeeds but FIID is not returned" in {
+
+        when(
+          mockCADXSubmissionService
+            .createOrUpdateFI(
+              any[CreateRequestDetails]()
+            )(
+              any[HeaderCarrier](),
+              any[ExecutionContext](),
+              any[Writes[FIManagement[FIDetailsRequest[CreateRequestDetails]]]]
+            )
+        ).thenReturn(
+          Future.successful(
+            HttpResponse(
+              OK,
+              createResponseWithoutPoidJson,
+              Map.empty
+            )
+          )
+        )
+
+        val request =
+          FakeRequest(
+            POST,
+            routes.FIManagementController
+              .createFinancialInstitution()
+              .url
+          ).withJsonBody(fiDetailsRequestJson)
+
+        val result = route(app, request).value
+
+        status(result) mustEqual OK
+        contentAsJson(result) mustBe createResponseWithoutPoidJson
+
+        verifyNoInteractions(mockAuditService)
       }
 
       "must not send an audit event when create fails" in {
