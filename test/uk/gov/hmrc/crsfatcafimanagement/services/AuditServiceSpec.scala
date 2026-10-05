@@ -78,13 +78,13 @@ class AuditServiceSpec extends AnyFreeSpec with Matchers with MockitoSugar with 
             GIIN = Some("GIIN123456"),
             IsFIUser = true,
             AddressDetails = AddressIncAllFields(
-              addressLine1 = "1 Test Street",
-              addressLine2 = Some("Test Area"),
-              addressLine3 = Some("Test City"),
-              addressLine4 = Some("Test County"),
-              postCode = Some("TE1 1ST"),
-              country = Some("GB"),
-              uprn = Some(123456789L)
+              AddressLine1 = "1 Test Street",
+              AddressLine2 = Some("Test Area"),
+              AddressLine3 = Some("Test City"),
+              AddressLine4 = Some("Test County"),
+              PostalCode = Some("TE1 1ST"),
+              CountryCode = Some("GB"),
+              Uprn = Some(123456789L)
             ),
             PrimaryContactDetails = Some(
               ContactDetails(
@@ -167,13 +167,13 @@ class AuditServiceSpec extends AnyFreeSpec with Matchers with MockitoSugar with 
             GIIN = None,
             IsFIUser = false,
             AddressDetails = AddressIncAllFields(
-              addressLine1 = "1 Test Street",
-              addressLine2 = None,
-              addressLine3 = None,
-              addressLine4 = None,
-              postCode = Some("TE1 1ST"),
-              country = Some("GB"),
-              uprn = None
+              AddressLine1 = "1 Test Street",
+              AddressLine2 = None,
+              AddressLine3 = None,
+              AddressLine4 = None,
+              PostalCode = Some("TE1 1ST"),
+              CountryCode = Some("GB"),
+              Uprn = None
             ),
             PrimaryContactDetails = None,
             SecondaryContactDetails = None
@@ -231,13 +231,13 @@ class AuditServiceSpec extends AnyFreeSpec with Matchers with MockitoSugar with 
             GIIN = Some("GIIN123456"),
             IsFIUser = false,
             AddressDetails = AddressIncAllFields(
-              addressLine1 = "2 Updated Street",
-              addressLine2 = Some("Updated Area"),
-              addressLine3 = Some("Updated City"),
-              addressLine4 = Some("Updated County"),
-              postCode = Some("UP1 1AA"),
-              country = Some("GB"),
-              uprn = Some(987654321L)
+              AddressLine1 = "2 Updated Street",
+              AddressLine2 = Some("Updated Area"),
+              AddressLine3 = Some("Updated City"),
+              AddressLine4 = Some("Updated County"),
+              PostalCode = Some("UP1 1AA"),
+              CountryCode = Some("GB"),
+              Uprn = Some(987654321L)
             ),
             PrimaryContactDetails = Some(
               ContactDetails(
@@ -311,13 +311,13 @@ class AuditServiceSpec extends AnyFreeSpec with Matchers with MockitoSugar with 
             GIIN = None,
             IsFIUser = false,
             AddressDetails = AddressIncAllFields(
-              addressLine1 = "1 Test Street",
-              addressLine2 = None,
-              addressLine3 = None,
-              addressLine4 = None,
-              postCode = None,
-              country = None,
-              uprn = None
+              AddressLine1 = "1 Test Street",
+              AddressLine2 = None,
+              AddressLine3 = None,
+              AddressLine4 = None,
+              PostalCode = None,
+              CountryCode = None,
+              Uprn = None
             ),
             PrimaryContactDetails = None,
             SecondaryContactDetails = None
