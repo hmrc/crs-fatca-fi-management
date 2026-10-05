@@ -99,13 +99,13 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
       |    "EmailAddress": "jane.doe@example.com"
       |  },
       |  "AddressDetails": {
-      |    "addressLine1": "100 Sutton Street",
-      |    "addressLine2": "Wokingham",
-      |    "addressLine3": "Surrey",
-      |    "addressLine4": "London",
-      |    "postCode": "DH14EJ",
-      |    "country": "GB",
-      |    "uprn": 123456789
+      |    "AddressLine1": "100 Sutton Street",
+      |    "AddressLine2": "Wokingham",
+      |    "AddressLine3": "Surrey",
+      |    "AddressLine4": "London",
+      |    "PostalCode": "DH14EJ",
+      |    "CountryCode": "GB",
+      |    "Uprn": 123456789
       |  }
       |}""".stripMargin
   )
@@ -130,12 +130,12 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
       |    "EmailAddress": "jane.doe@example.com"
       |  },
       |  "AddressDetails": {
-      |    "addressLine1": "100 Sutton Street",
-      |    "addressLine2": "Wokingham",
-      |    "addressLine3": "Surrey",
-      |    "addressLine4": "London",
-      |    "postCode": "DH14EJ",
-      |    "country": "GB"
+      |    "AddressLine1": "100 Sutton Street",
+      |    "AddressLine2": "Wokingham",
+      |    "AddressLine3": "Surrey",
+      |    "AddressLine4": "London",
+      |    "PostalCode": "DH14EJ",
+      |    "CountryCode": "GB"
       |  }
       |}""".stripMargin
   )
@@ -513,7 +513,7 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
             any[HeaderCarrier]()
           )
 
-        requestCaptor.getValue.AddressDetails.uprn mustBe None
+        requestCaptor.getValue.AddressDetails.Uprn mustBe None
       }
 
       "must not send an audit event when create succeeds but FIID is not returned" in {
@@ -701,7 +701,7 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
             any[HeaderCarrier]()
           )
 
-        requestCaptor.getValue.AddressDetails.uprn mustBe None
+        requestCaptor.getValue.AddressDetails.Uprn mustBe None
       }
 
       "must not send an audit event when update fails" in {
