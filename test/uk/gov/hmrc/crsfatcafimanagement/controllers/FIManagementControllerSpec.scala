@@ -154,7 +154,7 @@ class FIManagementControllerSpec extends SpecBase with Generators with BeforeAnd
        |  "ResponseDetails": {
        |    "processingDate": "2001-12-17T09:30:47z",
        |    "ReturnParameters": {
-       |      "Key": "POID",
+       |      "Key": "FIID",
        |      "Value": "$financialInstitutionId"
        |    }
        |  }

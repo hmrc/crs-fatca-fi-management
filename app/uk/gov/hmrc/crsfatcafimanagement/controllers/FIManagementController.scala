@@ -31,7 +31,7 @@ import uk.gov.hmrc.crsfatcafimanagement.models.CADXRequestModels.{
   UpdateRequestDetails,
   UpdateRequestDetailsAllFields
 }
-import uk.gov.hmrc.crsfatcafimanagement.models.{FIDetail, RequestType}
+import uk.gov.hmrc.crsfatcafimanagement.models.RequestType
 import uk.gov.hmrc.crsfatcafimanagement.models.RequestType.{CREATE, UPDATE}
 import uk.gov.hmrc.crsfatcafimanagement.models.error.ErrorDetails
 import uk.gov.hmrc.crsfatcafimanagement.models.errors.CreateSubmissionError
@@ -193,7 +193,7 @@ class FIManagementController @Inject() (
           val value =
             (returnParameters \ "Value").asOpt[String]
 
-          if (key.contains("POID")) {
+          if (key.contains("FIID")) {
             value
           } else {
             None
