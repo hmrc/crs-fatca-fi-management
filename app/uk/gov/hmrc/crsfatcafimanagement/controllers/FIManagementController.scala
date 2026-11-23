@@ -87,7 +87,7 @@ class FIManagementController @Inject() (
         validated.fold(
           invalid =>
             Future.successful {
-              logger.warn(
+              logger.error(
                 s"createSubmission Json Validation Failed: $invalid"
               )
               InternalServerError("Json Validation Failed")
@@ -137,7 +137,7 @@ class FIManagementController @Inject() (
           .fold(
             invalid =>
               Future.successful {
-                logger.warn(
+                logger.error(
                   s"removeFinancialInstitution Json Validation Failed: $invalid"
                 )
                 InternalServerError("Json Validation Failed")
@@ -151,7 +151,7 @@ class FIManagementController @Inject() (
                   )
                   Ok
                 case Left(CreateSubmissionError(value)) =>
-                  logger.warn(s"CreateSubmissionError $value")
+                  logger.error(s"CreateSubmissionError $value")
                   InternalServerError(s"CreateSubmissionError $value")
               }
           )
