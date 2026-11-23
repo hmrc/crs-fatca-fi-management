@@ -5,16 +5,28 @@ This is the CRS/FATCA backend service for managing financial institutions
 
 ## Requirements
 
-This service is written in [Scala](http://www.scala-lang.org/) and [Play](http://playframework.com/), and requires a Java 11 [JRE] to run.
+This service is written in [Scala](http://www.scala-lang.org/) and [Play](http://playframework.com/), and requires a Java 21 [JRE] to run.
 
 ### Running the service
 
-This microservice is part of Service Manager: CRS_FATCA_ALL
-or
-Can be run individually through Service Manager: CRS_FATCA_FI_MANAGEMENT
-Port: 10034
+**Service manager:** CRS_FATCA_ALL
+
+**Individually via service manager:** CRS_FATCA_FI_MANAGEMENT
+
+**Port:** 10034
 
 Link: http://localhost:10034/crs-fatca-fi-management
+
+### API
+
+| Task                             | Supported methods | Description                                  |
+|----------------------------------|-------------------|----------------------------------------------|
+| /financial-institutions/create   | POST              | Create a Financial Institution               |
+| /financial-institutions/update | POST              | Update a existing Financial Institution      |
+| /financial-institutions/remove             | POST              | Remove a existing Financial Institution      |
+| /financial-institutions/:subscriptionId               | GET               | Returns list of FI for user (SubscriptionId) |
+| /financial-institutions/:subscriptionId/:financialInstitutionId               | GET               | Returns Detail of Financial Institution      |
+
 
 ---
 
@@ -26,7 +38,7 @@ sbt test
 
 Run integration tests:
 ```
-sbt "project it" test
+sbt it/test
 ```
 
 ---
