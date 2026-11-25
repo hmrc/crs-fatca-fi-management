@@ -71,7 +71,7 @@ class CADXSubmissionService @Inject() (connector: CADXConnector) extends Logging
           res.status match {
             case OK => Right(())
             case status =>
-              logger.warn(s"remove FI triggered status: $status")
+              logger.error(s"remove FI triggered status: $status")
               Left(CreateSubmissionError(status))
           }
       }
